@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import authAxios from '../api/auth'; 
+import authAxios from '../api/auth';
 
 interface AuthState {
     user: any;
@@ -10,7 +10,7 @@ interface AuthState {
 
 const initialState: AuthState = {
     user: null,
-    token: localStorage.getItem('token'), 
+    token: localStorage.getItem('token'),
     loading: false,
     error: null,
 };
@@ -21,7 +21,12 @@ export const register = createAsyncThunk(
     async (credentials: { username: string; email: string; password: string }, thunkAPI) => {
         try {
             const response = await authAxios.post('/register', credentials);
-            return response.data;
+            const { token, user } = response.data;
+
+            // Save token to localStorage
+            localStorage.setItem('token', token);
+
+            return { token, user };
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.response.data.message || 'Registration failed');
         }
@@ -49,7 +54,7 @@ export const login = createAsyncThunk(
 // Logout User
 export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
     try {
-        localStorage.removeItem('token'); // Remove token from localStorage
+        localStorage.removeItem('token'); 
         return;
     } catch (error: any) {
         return thunkAPI.rejectWithValue('Logout failed');
@@ -69,6 +74,8 @@ const authSlice = createSlice({
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.loading = false;
+                state.token = action.payload.token;
+                state.user = action.payload.user;
                 state.error = null;
             })
             .addCase(register.rejected, (state, action) => {

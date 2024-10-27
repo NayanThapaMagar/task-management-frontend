@@ -1,4 +1,3 @@
-// src/pages/Register.tsx
 import React, { useState, FormEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
@@ -37,10 +36,6 @@ const Register: React.FC = () => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
 
-        // Reset email error when typing in the email field
-        if (name === 'email') {
-            setEmailError(null);
-        }
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -67,7 +62,7 @@ const Register: React.FC = () => {
 
         try {
             await dispatch(register({ username: formData.name, email: formData.email, password })).unwrap();
-            navigate('/login'); // Redirect to login page on success
+            navigate('/'); // Redirect to the dashboard on success
         } catch (err: any) {
             setError(err || 'Registration failed. Please try again.');
         } finally {
@@ -117,8 +112,8 @@ const Register: React.FC = () => {
                         fullWidth
                         margin="normal"
                         required
-                        error={!!emailError} // Set error state based on email validation
-                        helperText={emailError} // Show helper text when there's an error
+                        error={!!emailError} 
+                        helperText={emailError} 
                     />
                     <TextField
                         label="Password"
