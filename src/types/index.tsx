@@ -13,7 +13,7 @@ export interface TaskCreate {
 
 export interface Task extends TaskCreate {
   _id: string;
-  status: 'pending' | 'completed';
+  status: 'to do' | 'pending' | 'completed';
   creator: string;
   comments: Comment[];
   createdAt: Date;

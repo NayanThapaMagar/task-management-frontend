@@ -11,7 +11,7 @@ interface TaskState {
     error: string | null;
     totalTasks: number;
     totalPages: number;
-    taskById: Task | null; 
+    taskById: Task | null;
 }
 
 // Initial state
@@ -23,7 +23,7 @@ const initialState: TaskState = {
     error: null,
     totalTasks: 0,
     totalPages: 0,
-    taskById: null, 
+    taskById: null,
 };
 
 // Async actions
@@ -32,7 +32,6 @@ export const fetchAllTasks = createAsyncThunk(
     async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
             const { data } = await tasksAxios.get('/', { params });
-            
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching tasks');
@@ -42,9 +41,9 @@ export const fetchAllTasks = createAsyncThunk(
 
 export const fetchMyTasks = createAsyncThunk(
     'tasks/fetchMyTasks',
-    async (_, { rejectWithValue }) => {
+    async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.get('/my-tasks');
+            const { data } = await tasksAxios.get('/my-tasks', { params });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching my tasks');
@@ -54,9 +53,9 @@ export const fetchMyTasks = createAsyncThunk(
 
 export const fetchAssignedTasks = createAsyncThunk(
     'tasks/fetchAssignedTasks',
-    async (_, { rejectWithValue }) => {
+    async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.get('/assigned-tasks');
+            const { data } = await tasksAxios.get('/assigned-tasks', { params });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching assigned tasks');
@@ -174,6 +173,36 @@ const taskSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // Fetch my tasks
+            .addCase(fetchMyTasks.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchMyTasks.fulfilled, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.myTasks = action.payload.tasks;
+                state.totalTasks = action.payload.totalTasks;
+                state.totalPages = action.payload.totalPages;
+            })
+            .addCase(fetchMyTasks.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Fetch assigned tasks
+            .addCase(fetchAssignedTasks.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchAssignedTasks.fulfilled, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.assignedTasks = action.payload.tasks;
+                state.totalTasks = action.payload.totalTasks;
+                state.totalPages = action.payload.totalPages;
+            })
+            .addCase(fetchAssignedTasks.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
             // Fetch task by ID
             .addCase(fetchTaskById.fulfilled, (state, action: PayloadAction<Task>) => {
                 state.taskById = action.payload;
@@ -236,7 +265,9 @@ const taskSlice = createSlice({
 });
 
 // Selector
-export const selectTasks = (state: RootState) => state.tasks.tasks;
+export const selectAllTasks = (state: RootState) => state.tasks.tasks;
+export const selectMyTasks = (state: RootState) => state.tasks.myTasks;
+export const selectAssignedTasks = (state: RootState) => state.tasks.assignedTasks;
 
 // Actions and reducer export
 export const { resetError, setMyTasks, setAssignedTasks, setTaskById } = taskSlice.actions;

@@ -112,8 +112,8 @@ const Register: React.FC = () => {
                         fullWidth
                         margin="normal"
                         required
-                        error={!!emailError} 
-                        helperText={emailError} 
+                        error={!!emailError}
+                        helperText={emailError}
                     />
                     <TextField
                         label="Password"
@@ -124,19 +124,17 @@ const Register: React.FC = () => {
                         fullWidth
                         margin="normal"
                         required
-                        slotProps={{
-                            input: {
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={handleClickShowPassword}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            },
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={handleClickShowPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
                         }}
                     />
                     <TextField
@@ -148,19 +146,17 @@ const Register: React.FC = () => {
                         fullWidth
                         margin="normal"
                         required
-                        slotProps={{
-                            input: {
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={handleClickShowConfirmPassword}
-                                            edge="end"
-                                        >
-                                            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            },
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={handleClickShowConfirmPassword}
+                                        edge="end"
+                                    >
+                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
                         }}
                     />
                     <Button
