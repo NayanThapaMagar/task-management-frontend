@@ -129,59 +129,33 @@ const TaskListModal: React.FC<TaskListModalProps> = ({ onTaskClick, onAddTaskCli
                     spacing={2}
                     sx={{
                         display: 'flex',
-                        flexDirection: 'row', 
-                        overflowX: 'auto',  
+                        flexDirection: 'row',
+                        overflowX: 'auto',
                         flexWrap: 'nowrap',
-                        // justifyContent: 'center'
+                        justifyContent: 'center', 
                     }}
                 >
-                    <Grid item sx={{
-                        padding: 1,
-                        margin: 1,
-                        border: '1px solid #ccc',
-                        borderRadius: '8px',
-                        boxShadow: 2,
-                        backgroundColor: 'background.paper',
-                        minWidth: '300px',
-                    }}
-                    >
-                        <Box mb={2}>
-                            <h3>To Do</h3>
-                            <TaskList tasks={groupedTasks['To Do']} onTaskClick={onTaskClick} />
-                        </Box>
-                    </Grid>
-                    <Grid item sx={{
-                        padding: 1,
-                        margin: 1,
-                        border: '1px solid #ccc',
-                        borderRadius: '8px',
-                        boxShadow: 2,
-                        backgroundColor: 'background.paper',
-                        minWidth: '300px',
-                    }}
-                    >
-                        <Box mb={2}>
-                            <h3>Pending</h3>
-                            <TaskList tasks={groupedTasks['Pending']} onTaskClick={onTaskClick} />
-                        </Box>
-                    </Grid>
-                    <Grid item sx={{
-                        padding: 1,
-                        margin: 1,
-                        border: '1px solid #ccc',
-                        borderRadius: '8px',
-                        boxShadow: 2,
-                        backgroundColor: 'background.paper',
-                        minWidth: '300px',
-                    }}
-                    >
-                        <Box mb={2}>
-                            <h3>Completed</h3>
-                            <TaskList tasks={groupedTasks['Completed']} onTaskClick={onTaskClick} />
-                        </Box>
-                    </Grid>
+                    {Object.entries(groupedTasks).map(([status, tasks]) => (
+                        <Grid
+                            key={status}
+                            item
+                            sx={{
+                                padding: 1,
+                                margin: 1,
+                                border: '1px solid #ccc',
+                                borderRadius: '8px',
+                                boxShadow: 2,
+                                backgroundColor: 'background.paper',
+                                minWidth: '300px',
+                            }}
+                        >
+                            <Box mb={2}>
+                                <h3>{status}</h3>
+                                <TaskList tasks={tasks} onTaskClick={onTaskClick} />
+                            </Box>
+                        </Grid>
+                    ))}
                 </Grid>
-
             )}
             <br />
 

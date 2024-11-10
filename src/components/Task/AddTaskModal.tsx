@@ -60,6 +60,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onClose, onSnackOpen 
                 margin="normal"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                required
             />
             <TextField
                 label="Description"
@@ -67,6 +68,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onClose, onSnackOpen 
                 margin="normal"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                required
             />
             <FormControl fullWidth margin="normal">
                 <InputLabel>Priority</InputLabel>

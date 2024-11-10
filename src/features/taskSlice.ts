@@ -260,6 +260,8 @@ const taskSlice = createSlice({
             // Delete task
             .addCase(deleteTask.fulfilled, (state, action: PayloadAction<string>) => {
                 state.tasks = state.tasks.filter((task) => task._id !== action.payload);
+                state.myTasks = state.myTasks.filter((task) => task._id !== action.payload);
+                state.assignedTasks = state.assignedTasks.filter((task) => task._id !== action.payload);
             });
     },
 });

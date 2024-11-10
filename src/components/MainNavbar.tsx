@@ -20,7 +20,10 @@ import {
     Menu as MenuIcon,
     Dashboard as DashboardIcon,
     Logout,
-    Assignment, // Import the Assignment icon for tasks
+    Assignment,
+    People,
+    ChevronLeft,
+    ChevronRight,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -86,8 +89,12 @@ const MainNavbar: React.FC = () => {
                 open={drawerOpen}
                 onClose={() => setDrawerOpen(false)}
                 sx={{
-                    width: 240,
-                    '& .MuiDrawer-paper': { width: 240 },
+                    width: drawerOpen ? 240 : 56,
+                    '& .MuiDrawer-paper': {
+                        width: drawerOpen ? 240 : 56,
+                        overflowX: 'hidden',
+                        transition: 'width 0.3s',
+                    },
                 }}
             >
                 <Toolbar />
@@ -100,9 +107,15 @@ const MainNavbar: React.FC = () => {
                     </ListItemButton>
                     <ListItemButton onClick={() => handleNavigation('/tasks')}>
                         <ListItemIcon>
-                            <Assignment /> {/* Icon for Tasks */}
+                            <Assignment />
                         </ListItemIcon>
                         <ListItemText primary="Tasks" />
+                    </ListItemButton>
+                    <ListItemButton onClick={() => handleNavigation('/userConnection')}>
+                        <ListItemIcon>
+                            <People />
+                        </ListItemIcon>
+                        <ListItemText primary="User Connections" />
                     </ListItemButton>
                     <ListItemButton onClick={handleLogout}>
                         <ListItemIcon>
@@ -112,6 +125,24 @@ const MainNavbar: React.FC = () => {
                     </ListItemButton>
                 </List>
             </Drawer>
+
+            <IconButton
+                onClick={() => setDrawerOpen(!drawerOpen)}
+                sx={{
+                    position: 'fixed',
+                    left: drawerOpen ? 220 : 36,
+                    transition: 'left 0.3s',
+                    top: '500px',
+                    backgroundColor: 'grey.100', 
+                    color: 'black', 
+                    zIndex: 1300, 
+                    '&:hover': {
+                        backgroundColor: 'grey.300', 
+                    },
+                }}
+            >
+                {drawerOpen ? <ChevronLeft /> : <ChevronRight />}
+            </IconButton>
         </Box>
 
     );

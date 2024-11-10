@@ -1,3 +1,9 @@
+export interface UserConnection {
+  _id: string;
+  username: string;
+  email: string;
+}
+
 export interface Comment {
   userId: string;
   text: string;
