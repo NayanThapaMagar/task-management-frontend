@@ -16,7 +16,7 @@ import {
     FormLabel,
 } from '@mui/material';
 import { Task as TaskType } from '../../types';
-import TaskList from './TaskList';
+import TaskList from './TaskCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllTasks, fetchMyTasks, fetchAssignedTasks, selectAllTasks, selectMyTasks, selectAssignedTasks } from '../../features/taskSlice';
 import { AppDispatch } from '../../store';
@@ -86,7 +86,6 @@ const TaskListModal: React.FC<TaskListModalProps> = ({ onTaskClick, onAddTaskCli
 
     return (
         <Box>
-
             <Box display="flex" justifyContent="space-between" mb={3}>
                 <TextField
                     label="Search"

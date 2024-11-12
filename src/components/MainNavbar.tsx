@@ -130,14 +130,16 @@ const MainNavbar: React.FC = () => {
                 onClick={() => setDrawerOpen(!drawerOpen)}
                 sx={{
                     position: 'fixed',
-                    left: drawerOpen ? 220 : 36,
+                    left: drawerOpen ? 228 : 44,
                     transition: 'left 0.3s',
-                    top: '500px',
-                    backgroundColor: 'grey.100', 
-                    color: 'black', 
-                    zIndex: 1300, 
+                    top: '100px',
+                    backgroundColor: 'grey.100',
+                    color: 'black',
+                    width: 23, 
+                    height: 23,
+                    zIndex: 1300,
                     '&:hover': {
-                        backgroundColor: 'grey.300', 
+                        backgroundColor: 'grey.300',
                     },
                 }}
             >

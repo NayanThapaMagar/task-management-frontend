@@ -7,6 +7,7 @@ interface UserConnectionState {
     connections: UserConnection[];
     loading: boolean;
     error: string | null;
+    success: string | null;
 }
 
 // Initial state
@@ -14,6 +15,7 @@ const initialState: UserConnectionState = {
     connections: [],
     loading: false,
     error: null,
+    success: null,
 };
 
 // Async thunks
@@ -38,7 +40,7 @@ export const addUserConnection = createAsyncThunk(
             const { data } = await userConnectionAxios.post('/', userConnectionData);
             return data;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data?.message || 'Failed to add connection');
         }
     }
 );
@@ -48,8 +50,8 @@ export const removeUserConnection = createAsyncThunk(
     'userConnection/remove',
     async (userId: string, { rejectWithValue }) => {
         try {
-            await userConnectionAxios.delete(`/${userId}`);
-            return userId;
+            const { data } = await userConnectionAxios.delete(`/${userId}`);
+            return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Failed to remove connection');
         }
@@ -61,8 +63,9 @@ const userConnectionSlice = createSlice({
     name: 'userConnection',
     initialState,
     reducers: {
-        resetError(state) {
+        resetMessages(state) {
             state.error = null;
+            state.success = null;
         },
     },
     extraReducers: (builder) => {
@@ -70,45 +73,50 @@ const userConnectionSlice = createSlice({
         builder
             .addCase(fetchUserConnections.pending, (state) => {
                 state.loading = true;
-                state.error = null;
             })
             .addCase(fetchUserConnections.fulfilled, (state, action: PayloadAction<any>) => {
-                state.loading = false;
+                // state.error = null;
                 state.connections = action.payload.connections;
+                state.loading = false;
             })
             .addCase(fetchUserConnections.rejected, (state, action: PayloadAction<any>) => {
-                state.loading = false;
                 state.error = action.payload;
+                // state.success = null;
+                state.loading = false;
             });
 
         // Add connection
         builder
             .addCase(addUserConnection.pending, (state) => {
                 state.loading = true;
-                state.error = null;
             })
             .addCase(addUserConnection.fulfilled, (state, action: PayloadAction<any>) => {
-                state.loading = false;
                 state.connections.push(action.payload.newConnection);
+                state.success = action.payload?.message || 'New connection added succesfully';
+                // state.error = null;
+                state.loading = false;
             })
             .addCase(addUserConnection.rejected, (state, action: PayloadAction<any>) => {
-                state.loading = false;
                 state.error = action.payload;
+                // state.success = null;
+                state.loading = false;
             });
 
         // Remove connection
         builder
             .addCase(removeUserConnection.pending, (state) => {
                 state.loading = true;
-                state.error = null;
             })
-            .addCase(removeUserConnection.fulfilled, (state, action: PayloadAction<string>) => {
+            .addCase(removeUserConnection.fulfilled, (state, action: PayloadAction<any>) => {
+                state.connections = state.connections.filter(connection => connection._id !== action.payload.id);
+                state.success = action.payload?.message || 'Conncetion removed succesfully';
+                // state.error = null;
                 state.loading = false;
-                state.connections = state.connections.filter(connection => connection._id !== action.payload);
             })
             .addCase(removeUserConnection.rejected, (state, action: PayloadAction<any>) => {
-                state.loading = false;
                 state.error = action.payload;
+                // state.success = null;
+                state.loading = false;
             });
     },
 });
@@ -118,5 +126,5 @@ export const selectAllConnections = (state: RootState) => state.userConnection.c
 
 
 // Export actions and reducer
-export const { resetError } = userConnectionSlice.actions;
+export const { resetMessages } = userConnectionSlice.actions;
 export default userConnectionSlice.reducer;

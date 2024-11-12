@@ -9,9 +9,10 @@ interface TaskState {
     assignedTasks: Task[];
     loading: boolean;
     error: string | null;
+    success: string | null;
     totalTasks: number;
     totalPages: number;
-    taskById: Task | null;
+    selectedTask: Task | null;
 }
 
 // Initial state
@@ -21,9 +22,10 @@ const initialState: TaskState = {
     assignedTasks: [],
     loading: false,
     error: null,
+    success: null,
     totalTasks: 0,
     totalPages: 0,
-    taskById: null,
+    selectedTask: null,
 };
 
 // Async actions
@@ -130,8 +132,8 @@ export const deleteTask = createAsyncThunk(
     'tasks/delete',
     async (taskId: string, { rejectWithValue }) => {
         try {
-            await tasksAxios.delete(`/${taskId}`);
-            return taskId;
+            const { data } = await tasksAxios.delete(`/${taskId}`);
+            return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error deleting task');
         }
@@ -143,8 +145,12 @@ const taskSlice = createSlice({
     name: 'tasks',
     initialState,
     reducers: {
-        resetError: (state) => {
+        resetMessages(state) {
             state.error = null;
+            state.success = null;
+        },
+        setError(state, action: PayloadAction<string>) {
+            state.error = action.payload;
         },
         setMyTasks: (state, action: PayloadAction<Task[]>) => {
             state.myTasks = action.payload;
@@ -152,8 +158,11 @@ const taskSlice = createSlice({
         setAssignedTasks: (state, action: PayloadAction<Task[]>) => {
             state.assignedTasks = action.payload;
         },
-        setTaskById: (state, action: PayloadAction<Task>) => {
-            state.taskById = action.payload;
+        setSelectedTask: (state, action: PayloadAction<Task>) => {
+            state.selectedTask = action.payload;
+        },
+        resetSelectedTask: (state) => {
+            state.selectedTask = null;
         },
     },
     extraReducers: (builder) => {
@@ -165,8 +174,8 @@ const taskSlice = createSlice({
             .addCase(fetchAllTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.tasks = action.payload.tasks;
-                state.totalTasks = action.payload.totalTasks;
-                state.totalPages = action.payload.totalPages;
+                // state.totalTasks = action.payload.totalTasks;
+                // state.totalPages = action.payload.totalPages;
             })
             .addCase(fetchAllTasks.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -180,8 +189,8 @@ const taskSlice = createSlice({
             .addCase(fetchMyTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.myTasks = action.payload.tasks;
-                state.totalTasks = action.payload.totalTasks;
-                state.totalPages = action.payload.totalPages;
+                // state.totalTasks = action.payload.totalTasks;
+                // state.totalPages = action.payload.totalPages;
             })
             .addCase(fetchMyTasks.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -195,8 +204,8 @@ const taskSlice = createSlice({
             .addCase(fetchAssignedTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.assignedTasks = action.payload.tasks;
-                state.totalTasks = action.payload.totalTasks;
-                state.totalPages = action.payload.totalPages;
+                // state.totalTasks = action.payload.totalTasks;
+                // state.totalPages = action.payload.totalPages;
             })
             .addCase(fetchAssignedTasks.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -204,20 +213,27 @@ const taskSlice = createSlice({
             })
 
             // Fetch task by ID
+            .addCase(fetchTaskById.pending, (state) => {
+                state.loading = true;
+            })
+            // Fetch task by ID
             .addCase(fetchTaskById.fulfilled, (state, action: PayloadAction<Task>) => {
-                state.taskById = action.payload;
+                state.selectedTask = action.payload;
+                state.loading = false;
             })
             .addCase(fetchTaskById.rejected, (state, action: PayloadAction<any>) => {
                 state.error = action.payload;
+                state.loading = false;
             })
 
             // Create task
             .addCase(createTask.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(createTask.fulfilled, (state, action: PayloadAction<Task>) => {
+            .addCase(createTask.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.tasks.push(action.payload);
+                state.tasks.push(action.payload.task);
+                state.success = action.payload.message;
             })
             .addCase(createTask.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -228,10 +244,12 @@ const taskSlice = createSlice({
             .addCase(updateTask.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(updateTask.fulfilled, (state, action: PayloadAction<Task>) => {
+            .addCase(updateTask.fulfilled, (state, action: PayloadAction<any>) => {
+                const index = state.tasks.findIndex((task) => task._id === action.payload.updatedTask._id);
+                if (index !== -1) state.tasks[index] = action.payload.updatedTask;
+                state.selectedTask = action.payload.updatedTask;
+                state.success = action.payload.message;
                 state.loading = false;
-                const index = state.tasks.findIndex((task) => task._id === action.payload._id);
-                if (index !== -1) state.tasks[index] = action.payload;
             })
             .addCase(updateTask.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -242,26 +260,45 @@ const taskSlice = createSlice({
             .addCase(updateTaskStatus.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(updateTaskStatus.fulfilled, (state, action: PayloadAction<Task>) => {
+            .addCase(updateTaskStatus.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                const index = state.tasks.findIndex((task) => task._id === action.payload._id);
-                if (index !== -1) state.tasks[index] = action.payload;
+                const index = state.tasks.findIndex((task) => task._id === action.payload.task._id);
+                if (index !== -1) state.tasks[index] = action.payload.task;
+                state.success = action.payload.message;
             })
             .addCase(updateTaskStatus.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.error = action.payload;
             })
+
             // Add comment to task
-            .addCase(addTaskComment.fulfilled, (state, action: PayloadAction<Task>) => {
-                const index = state.tasks.findIndex((task) => task._id === action.payload._id);
-                if (index !== -1) state.tasks[index].comments = action.payload.comments;
+            .addCase(addTaskComment.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(addTaskComment.fulfilled, (state, action: PayloadAction<any>) => {
+                const index = state.tasks.findIndex((task) => task._id === action.payload.task._id);
+                if (index !== -1) state.tasks[index].comments.push(action.payload.comment);
+                state.success = action.payload.message;
+            })
+            .addCase(addTaskComment.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
             })
 
             // Delete task
-            .addCase(deleteTask.fulfilled, (state, action: PayloadAction<string>) => {
-                state.tasks = state.tasks.filter((task) => task._id !== action.payload);
-                state.myTasks = state.myTasks.filter((task) => task._id !== action.payload);
-                state.assignedTasks = state.assignedTasks.filter((task) => task._id !== action.payload);
+            .addCase(deleteTask.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(deleteTask.fulfilled, (state, action: PayloadAction<any>) => {
+                state.tasks = state.tasks.filter((task) => task._id !== action.payload.taskId);
+                state.myTasks = state.myTasks.filter((task) => task._id !== action.payload.taskId);
+                state.assignedTasks = state.assignedTasks.filter((task) => task._id !== action.payload.taskId);
+                state.success = action.payload.message;
+                state.loading = false;
+            })
+            .addCase(deleteTask.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
             });
     },
 });
@@ -272,5 +309,5 @@ export const selectMyTasks = (state: RootState) => state.tasks.myTasks;
 export const selectAssignedTasks = (state: RootState) => state.tasks.assignedTasks;
 
 // Actions and reducer export
-export const { resetError, setMyTasks, setAssignedTasks, setTaskById } = taskSlice.actions;
+export const { resetMessages, setMyTasks, setAssignedTasks, setSelectedTask, resetSelectedTask, setError } = taskSlice.actions;
 export default taskSlice.reducer;

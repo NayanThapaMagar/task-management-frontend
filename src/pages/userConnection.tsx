@@ -1,42 +1,29 @@
-import React, { useState, useEffect, FormEvent } from 'react';
-import { Box, Typography, IconButton, TextField, Menu, MenuItem, CircularProgress } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, IconButton, TextField, Menu, MenuItem, CircularProgress, Alert, Snackbar } from '@mui/material';
 import { Add, Cancel, MoreHoriz, PersonAdd } from '@mui/icons-material';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserConnections, addUserConnection, removeUserConnection, selectAllConnections } from '../features/userConnectionSlice';
+import useUserConnections from '../hooks/useUserConnections';
 import { UserConnection as UserConnectionType } from '../types';
-import { AppDispatch } from '../store';
 
 const UserConnection: React.FC = () => {
-    const dispatch = useDispatch<AppDispatch>();
-    const allConnections = useSelector(selectAllConnections);
+    const {
+        filteredConnections,
+        searchQuery,
+        userName,
+        loading,
+        error,
+        success,
+        openSnackbar,
+        handleSnackbarClose,
+        setUserName,
+        handleSearchChange,
+        handleAddConnection,
+        handleRemoveConnection,
+    } = useUserConnections();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [userName, setUserName] = useState<string>('');
-    const [listConnections, setlistConnections] = useState<UserConnectionType[]>([]);
-    const [loading, setLoading] = useState(true);
     const [currentConnectionOnMenu, setCurrentConnectionOnMenu] = useState<UserConnectionType | null>(null);
     const [showAddUserConnectionField, setShowAddUserConnectionField] = useState(false);
 
-    useEffect(() => {
-        setLoading(true);
-        dispatch(fetchUserConnections());
-        setLoading(false);
-    }, [dispatch]);
-
-    useEffect(() => {
-        // Filter connections based on the search term
-        const filteredConnections = allConnections.filter(
-            (connection) =>
-                connection.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                connection.email.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setlistConnections(filteredConnections);
-    }, [allConnections, searchQuery]);
-
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(event.target.value);
-    };
 
     const handleTaskMenuClick = (event: React.MouseEvent<HTMLElement>, connection: UserConnectionType) => {
         setAnchorEl(event.currentTarget);
@@ -46,21 +33,6 @@ const UserConnection: React.FC = () => {
     const handleUserMenuClose = () => {
         setAnchorEl(null);
         setCurrentConnectionOnMenu(null);
-    };
-
-    const handleAddConnection = (e: FormEvent) => {
-        e.preventDefault();
-        dispatch(addUserConnection({ connectionUsername: userName })).unwrap();
-        setUserName('');
-        setShowAddUserConnectionField(false);
-    };
-
-    const handleRemoveConnection = () => {
-        const userId = currentConnectionOnMenu?._id;
-        if (userId) {
-            dispatch(removeUserConnection(userId));
-        }
-        handleUserMenuClose();
     };
 
     const handleToggleAddField = () => {
@@ -88,7 +60,7 @@ const UserConnection: React.FC = () => {
                 </Box>
             ) : (
                 <Box>
-                    {listConnections.map((connection) => (
+                    {filteredConnections.map((connection) => (
                         <Box
                             key={connection._id}
                             border={1}
@@ -122,7 +94,7 @@ const UserConnection: React.FC = () => {
                                 onClose={handleUserMenuClose}
                                 onClick={handleUserMenuClose}
                             >
-                                <MenuItem onClick={handleRemoveConnection}>Remove</MenuItem>
+                                <MenuItem onClick={() => handleRemoveConnection(currentConnectionOnMenu)}>Remove</MenuItem>
                             </Menu>
                         </Box>
                     ))}
@@ -159,7 +131,24 @@ const UserConnection: React.FC = () => {
                     </Box>
                 )}
             </Box>
-        </Box>
+            {
+                (success || error) && (
+                    <Snackbar
+                        open={openSnackbar}
+                        autoHideDuration={3000}
+                        onClose={handleSnackbarClose}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    >
+                        <Alert
+                            onClose={handleSnackbarClose}
+                            severity={success ? 'success' : 'error'}
+                        >
+                            {success || error}
+                        </Alert>
+                    </Snackbar>
+                )
+            }
+        </Box >
     );
 };
 
