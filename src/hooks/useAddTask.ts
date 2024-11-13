@@ -6,6 +6,7 @@ import { fetchUserConnections, selectAllConnections } from '../features/userConn
 import { AppDispatch, RootState } from '../store';
 import { TaskCreate } from '../types';
 import { SelectChangeEvent } from '@mui/material';
+import htmlToMarkdown from "@wcj/html-to-markdown";
 
 const useAddTask = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -20,6 +21,7 @@ const useAddTask = () => {
     const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('low');
     const [assignedTo, setAssignedTo] = useState<string[]>([]);
 
+
     useEffect(() => {
         dispatch(fetchUserConnections());
     }, [dispatch]);
@@ -31,24 +33,30 @@ const useAddTask = () => {
     }, [error, success]);
 
     const handleSnackbarClose = () => {
-        console.log('handling snackbar close in add task');
         dispatch(resetMessages());
         setOpenSnackbar(false);
+    };
+
+    const convertHtmlToMarkdown = async () => {
+        const markdown = await htmlToMarkdown({ html: description });
+        return markdown; 
     };
 
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        const markedDownDescription = await convertHtmlToMarkdown();
+
         const strippedDescription = description.replace(/<[^>]+>/g, '').trim();
-        if (!strippedDescription) {
+        if (!strippedDescription || !markedDownDescription) {
             dispatch(setError('Description is required'))
             return;
         }
 
         const taskData: TaskCreate = {
             title,
-            description,
+            description: markedDownDescription,
             priority,
             assignedTo: assignedTo.length > 0 ? assignedTo : []
         };

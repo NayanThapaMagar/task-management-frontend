@@ -67,6 +67,7 @@ const AddTask: React.FC = () => {
                                 <ReactQuill
                                     value={description}
                                     onChange={setDescription}
+                                    placeholder={'Description'}
                                     style={{ marginBottom: '3rem', height: '250px' }}
                                 />
                             </Box>

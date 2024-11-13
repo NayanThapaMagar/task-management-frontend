@@ -42,7 +42,7 @@ const Task: React.FC = () => {
     return (
         <Container>
             <Box sx={{ p: 3, mt: 2 }}>
-                <Box display="flex" justifyContent="space-between" mb={3}>
+                <Box mb={3}>
                     <TextField
                         label="Search"
                         variant="outlined"
