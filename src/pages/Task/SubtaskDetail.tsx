@@ -1,16 +1,15 @@
 import React from 'react';
 import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, OutlinedInput, Divider, Container, Alert, Snackbar, CircularProgress } from '@mui/material';
-import PlaylistAddOutlinedIcon from '@mui/icons-material/PlaylistAddOutlined';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import useTaskDetail from '../../hooks/useTaskDetail';
+import useSubtaskDetail from '../../hooks/useSubtaskDetail';
 import { useNavigate } from 'react-router-dom';
 
 const TaskDetail: React.FC = () => {
 
     const {
         editMode,
-        selectedTask,
+        selectedSubtask,
         title,
         description,
         priority,
@@ -31,12 +30,12 @@ const TaskDetail: React.FC = () => {
         openSnackbar,
         handleSnackbarClose,
 
-    } = useTaskDetail();
+    } = useSubtaskDetail();
 
     const navigate = useNavigate();
 
-    if (!selectedTask) {
-        navigate('/tasks');
+    if (!selectedSubtask) {
+        navigate('tasks/taskDetail');
     }
 
     // Styles for the typing area (editor)
@@ -96,7 +95,7 @@ const TaskDetail: React.FC = () => {
                             <Typography variant="body1" fontWeight="bold" sx={{ marginRight: 1 }}>
                                 Status:
                             </Typography>
-                            <Typography variant="body1" sx={{ minWidth: "54px" }}>{selectedTask?.status.toUpperCase()}</Typography>
+                            <Typography variant="body1" sx={{ minWidth: "54px" }}>{selectedSubtask?.status.toUpperCase()}</Typography>
                         </Box>
                     </Box>
 
@@ -216,28 +215,6 @@ const TaskDetail: React.FC = () => {
                     </Box>
 
                     <Divider sx={{ mt: 2, mb: 2 }} />
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-                        <Button
-                            color="secondary"
-                            variant="outlined"
-                            startIcon={<PlaylistAddOutlinedIcon fontSize="medium" />}
-                            onClick={() => navigate('/tasks/addSubtask')}
-                            sx={{
-                                px: 3,
-                                py: 1,
-                                fontWeight: 'bold',
-                                borderRadius: 2,
-                                borderColor: 'secondary.main',
-                                '&:hover': {
-                                    color: 'white',
-                                    backgroundColor: 'secondary.light',
-                                    borderColor: 'secondary.dark',
-                                },
-                            }}
-                        >
-                            Add Subtask
-                        </Button>
-                    </Box>
 
                     <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
                         {(editMode.title || editMode.description || editMode.priority || editMode.assignedTo) && (

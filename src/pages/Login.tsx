@@ -1,8 +1,5 @@
-import React, { useState, FormEvent } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../features/authSlice'; 
-import { AppDispatch } from '../store';
+import React from 'react';
+import {  Link } from 'react-router-dom';
 import {
   TextField,
   Button,
@@ -10,59 +7,24 @@ import {
   Typography,
   Box,
   Alert,
+  IconButton,
+  InputAdornment,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
+import useLogin from '../hooks/useLogin';
 
 const Login: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const { email, password } = formData;
-
-    // Validate email format
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setEmailError('Please enter a valid email address.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      await dispatch(login({ email, password })).unwrap();
-      navigate('/'); 
-    } catch (err: any) {
-      setError(err || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
+  const {
+    handleSubmit,
+    formData,
+    emailError,
+    error,
+    loading,
+    showPassword,
+    handleChange,
+    handleClickShowPassword,
+  } = useLogin();
 
   return (
     <Container maxWidth="sm">
@@ -89,8 +51,8 @@ const Login: React.FC = () => {
             fullWidth
             margin="normal"
             required
-            error={!!emailError} 
-            helperText={emailError} 
+            error={!!emailError}
+            helperText={emailError}
           />
           <TextField
             label="Password"

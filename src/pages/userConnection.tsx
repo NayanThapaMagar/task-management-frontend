@@ -103,7 +103,19 @@ const UserConnection: React.FC = () => {
 
             <Box textAlign="center">
                 {!showAddUserConnectionField ? (
-                    <IconButton onClick={handleToggleAddField} color="primary" aria-label="add user connection">
+                    <IconButton
+                        onClick={handleToggleAddField}
+                        aria-label="add user connection"
+                        sx={{
+                            color: 'white',
+                            bgcolor: 'primary.light',
+                            '&:hover': {
+                                bgcolor: 'primary.main',
+                            },
+                            borderRadius: 2,
+                            p: 1.5,
+                        }}
+                    >
                         <PersonAdd fontSize="large" />
                     </IconButton>
                 ) : (
@@ -118,12 +130,46 @@ const UserConnection: React.FC = () => {
                                 required
                             />
                             <Box display="flex" justifyContent="center" gap={1} mt={1}>
-                                <IconButton type='submit' color="primary" aria-label="confirm add user connection">
-                                    <Typography variant="h6">Add</Typography>
+                                <IconButton
+                                    type="submit"
+                                    aria-label="confirm add user connection"
+                                    sx={{
+                                        color: 'white',
+                                        bgcolor: 'primary.main',
+                                        '&:hover': {
+                                            bgcolor: 'primary.dark',
+                                        },
+                                        p: 1.5,
+                                        borderRadius: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Typography variant="h6" sx={{ mr: 1 }}>
+                                        Add
+                                    </Typography>
                                     <Add />
                                 </IconButton>
-                                <IconButton onClick={handleToggleAddField} color="primary" aria-label="cancel add user connection">
-                                    <Typography variant="h6">Cancel</Typography>
+                                <IconButton
+                                    onClick={handleToggleAddField}
+                                    aria-label="cancel add user connection"
+                                    sx={{
+                                        color: 'white',
+                                        bgcolor: 'secondary.light',
+                                        '&:hover': {
+                                            bgcolor: 'secondary.main',
+                                        },
+                                        p: 1.5,
+                                        borderRadius: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Typography variant="h6" sx={{ mr: 1 }}>
+                                        Cancel
+                                    </Typography>
                                     <Cancel />
                                 </IconButton>
                             </Box>

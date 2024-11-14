@@ -3,7 +3,7 @@ import { SelectChangeEvent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Task as TaskType } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAllTasks, selectMyTasks, selectAssignedTasks, fetchAllTasks, fetchMyTasks, fetchAssignedTasks, setSelectedTask, resetMessages } from '../features/taskSlice';
+import { selectAllTasks, selectMyTasks, selectAssignedTasks, fetchAllTasks, fetchMyTasks, fetchAssignedTasks, updateTaskStatus, setSelectedTask, resetMessages } from '../features/taskSlice';
 import { AppDispatch, RootState } from '../store';
 
 const useTaskList = () => {
@@ -18,36 +18,34 @@ const useTaskList = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [search, setSearch] = useState('');
     const [priorityFilter, setPriorityFilter] = useState('all');
-    const [listTasks, setListTasks] = useState<TaskType[]>([]);
-    const [view, setView] = useState('all');
+    const [taskCategory, setTaskCategory] = useState('all');
 
-    const handleTaskClick = (task: TaskType) => {
-        dispatch(setSelectedTask(task))
-        navigate('/tasks/detail');
-    };
+    const [listTasks, setListTasks] = useState<TaskType[]>([]);
+
+    const [draggedTask, setDraggedTask] = useState<{ task: TaskType; currentStatus: string } | null>(null);
 
     const fetchData = async () => {
         const query: Record<string, string> = {};
         if (priorityFilter !== 'all') query.priority = priorityFilter;
 
-        if (view === 'all') {
+        if (taskCategory === 'all') {
             await dispatch(fetchAllTasks({ ...query, page: 1, limit: 10 }));
-        } else if (view === 'myTasks') {
+        } else if (taskCategory === 'myTasks') {
             await dispatch(fetchMyTasks({ ...query, page: 1, limit: 10 }));
-        } else if (view === 'assignedTasks') {
+        } else if (taskCategory === 'assignedTasks') {
             await dispatch(fetchAssignedTasks({ ...query, page: 1, limit: 10 }));
         }
     };
 
     useEffect(() => {
         fetchData();
-    }, [priorityFilter, view, dispatch]);
+    }, [priorityFilter, taskCategory, dispatch]);
 
     useEffect(() => {
-        const tasks = view === 'all' ? allTasks : view === 'myTasks' ? myTasks : assignedTasks;
+        const tasks = taskCategory === 'all' ? allTasks : taskCategory === 'myTasks' ? myTasks : assignedTasks;
         const filteredTasks = tasks.filter((task) => task.title.toLowerCase().includes(search.toLowerCase()));
         setListTasks(filteredTasks);
-    }, [allTasks, myTasks, assignedTasks, search, view]);
+    }, [allTasks, myTasks, assignedTasks, search, taskCategory]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
@@ -57,8 +55,31 @@ const useTaskList = () => {
         setPriorityFilter(e.target.value);
     };
 
-    const handleViewChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setView(e.target.value);
+    const handleTaskCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTaskCategory(e.target.value);
+    };
+
+    const handleTaskClick = (task: TaskType) => {
+        dispatch(setSelectedTask(task))
+        navigate('/tasks/taskDetail');
+    };
+
+    const handleDragStart = (e: React.DragEvent<HTMLElement>, task: TaskType, currentStatus: string) => {
+        e.dataTransfer.effectAllowed = "move";
+        setDraggedTask({ task, currentStatus });
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    };
+
+    const handleDrop = async (e: React.DragEvent<HTMLElement>, newStatus: string) => {
+        e.preventDefault();
+        if (draggedTask && draggedTask.currentStatus !== newStatus) {
+            await dispatch(updateTaskStatus({ taskId: draggedTask.task._id, status: newStatus.toLocaleLowerCase() }))
+        }
+        setDraggedTask(null);
     };
 
     useEffect(() => {
@@ -83,10 +104,13 @@ const useTaskList = () => {
         handleTaskClick,
         priorityFilter,
         handlePriorityFilterChange,
-        view,
-        handleViewChange,
+        taskCategory,
+        handleTaskCategoryChange,
         search,
         handleSearchChange,
+        handleDragStart,
+        handleDragOver,
+        handleDrop,
         loading,
         success,
         error,

@@ -26,3 +26,13 @@ export interface Task extends TaskCreate {
   updatedAt: Date;
 }
 
+export interface SubTask extends TaskCreate {
+  _id: string;
+  status: 'to do' | 'pending' | 'completed';
+  creator: string;
+  comments: Comment[];
+  taskId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+

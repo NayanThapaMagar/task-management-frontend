@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import userConnectionAxios from '../api/userConnection';
+import axiosInstance from '../api/axios';
 import { UserConnection } from '../types';
+
+const BASE_URL = '/connections';
 
 interface UserConnectionState {
     connections: UserConnection[];
@@ -24,7 +26,7 @@ export const fetchUserConnections = createAsyncThunk(
     'userConnection/fetchAll',
     async (_, { rejectWithValue }) => {
         try {
-            const { data } = await userConnectionAxios.get('/');
+            const { data } = await axiosInstance.get(`${BASE_URL}`);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch connections');
@@ -37,7 +39,7 @@ export const addUserConnection = createAsyncThunk(
     'userConnection/add',
     async (userConnectionData: { connectionUsername: string }, { rejectWithValue }) => {
         try {
-            const { data } = await userConnectionAxios.post('/', userConnectionData);
+            const { data } = await axiosInstance.post(`${BASE_URL}`, userConnectionData);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Failed to add connection');
@@ -50,7 +52,7 @@ export const removeUserConnection = createAsyncThunk(
     'userConnection/remove',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const { data } = await userConnectionAxios.delete(`/${userId}`);
+            const { data } = await axiosInstance.delete(`${BASE_URL}/${userId}`);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Failed to remove connection');

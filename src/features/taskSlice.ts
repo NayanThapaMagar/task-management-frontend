@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import tasksAxios from '../api/tasks';
+import axiosInstance from '../api/axios';
 import { Task } from '../types';
+
+const BASE_URL = '/tasks';
 
 interface TaskState {
     tasks: Task[];
@@ -33,7 +35,7 @@ export const fetchAllTasks = createAsyncThunk(
     'tasks/fetchAll',
     async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.get('/', { params });
+            const { data } = await axiosInstance.get(`${BASE_URL}`, { params });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching tasks');
@@ -45,7 +47,7 @@ export const fetchMyTasks = createAsyncThunk(
     'tasks/fetchMyTasks',
     async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.get('/my-tasks', { params });
+            const { data } = await axiosInstance.get(`${BASE_URL}/my-tasks`, { params });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching my tasks');
@@ -57,7 +59,7 @@ export const fetchAssignedTasks = createAsyncThunk(
     'tasks/fetchAssignedTasks',
     async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.get('/assigned-tasks', { params });
+            const { data } = await axiosInstance.get(`${BASE_URL}/assigned-tasks`, { params });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching assigned tasks');
@@ -70,7 +72,7 @@ export const fetchTaskById = createAsyncThunk(
     'tasks/fetchById',
     async (taskId: string, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.get(`/${taskId}`);
+            const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}`);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching task');
@@ -82,7 +84,7 @@ export const createTask = createAsyncThunk(
     'tasks/create',
     async (taskData: { title: string; description: string; priority: string; assignedTo: string[] }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.post('/', taskData);
+            const { data } = await axiosInstance.post(`${BASE_URL}`, taskData);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error creating task');
@@ -94,7 +96,7 @@ export const updateTask = createAsyncThunk(
     'tasks/update',
     async ({ taskId, updates }: { taskId: string; updates: { title?: string; description?: string; priority?: string; assignedTo?: string[] } }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.put(`/${taskId}`, updates);
+            const { data } = await axiosInstance.put(`${BASE_URL}/${taskId}`, updates);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error updating task');
@@ -107,7 +109,7 @@ export const updateTaskStatus = createAsyncThunk(
     'tasks/updateStatus',
     async ({ taskId, status }: { taskId: string; status: string }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.patch(`/${taskId}/status`, { status });
+            const { data } = await axiosInstance.patch(`${BASE_URL}/${taskId}/status`, { status });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error updating task status');
@@ -120,7 +122,7 @@ export const addTaskComment = createAsyncThunk(
     'tasks/addComment',
     async ({ taskId, text }: { taskId: string; text: string }, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.post(`/${taskId}/comments`, { text });
+            const { data } = await axiosInstance.post(`${BASE_URL}/${taskId}/comments`, { text });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error adding comment');
@@ -132,7 +134,7 @@ export const deleteTask = createAsyncThunk(
     'tasks/delete',
     async (taskId: string, { rejectWithValue }) => {
         try {
-            const { data } = await tasksAxios.delete(`/${taskId}`);
+            const { data } = await axiosInstance.delete(`${BASE_URL}/${taskId}`);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error deleting task');
@@ -217,8 +219,8 @@ const taskSlice = createSlice({
                 state.loading = true;
             })
             // Fetch task by ID
-            .addCase(fetchTaskById.fulfilled, (state, action: PayloadAction<Task>) => {
-                state.selectedTask = action.payload;
+            .addCase(fetchTaskById.fulfilled, (state, action: PayloadAction<any>) => {
+                state.selectedTask = action.payload.task;
                 state.loading = false;
             })
             .addCase(fetchTaskById.rejected, (state, action: PayloadAction<any>) => {
@@ -279,6 +281,7 @@ const taskSlice = createSlice({
                 const index = state.tasks.findIndex((task) => task._id === action.payload.task._id);
                 if (index !== -1) state.tasks[index].comments.push(action.payload.comment);
                 state.success = action.payload.message;
+                state.loading = false;
             })
             .addCase(addTaskComment.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -290,9 +293,9 @@ const taskSlice = createSlice({
                 state.loading = true;
             })
             .addCase(deleteTask.fulfilled, (state, action: PayloadAction<any>) => {
-                state.tasks = state.tasks.filter((task) => task._id !== action.payload.taskId);
-                state.myTasks = state.myTasks.filter((task) => task._id !== action.payload.taskId);
-                state.assignedTasks = state.assignedTasks.filter((task) => task._id !== action.payload.taskId);
+                state.tasks = state.tasks.filter((task) => task._id !== action.payload.deletedTaskId);
+                state.myTasks = state.myTasks.filter((task) => task._id !== action.payload.deletedTaskId);
+                state.assignedTasks = state.assignedTasks.filter((task) => task._id !== action.payload.deletedTaskId);
                 state.success = action.payload.message;
                 state.loading = false;
             })

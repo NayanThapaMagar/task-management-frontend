@@ -18,10 +18,10 @@ import {
 } from '@mui/material';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import useAddTask from '../../hooks/useAddTask';
 import { useNavigate } from 'react-router-dom';
+import useAddSubtask from '../../hooks/useAddSubask';
 
-const AddTask: React.FC = () => {
+const AddSubtask: React.FC = () => {
     const {
         title,
         setTitle,
@@ -38,7 +38,7 @@ const AddTask: React.FC = () => {
         handleSubmit,
         handleAssignedToChange,
         handleSnackbarClose,
-    } = useAddTask();
+    } = useAddSubtask();
 
     const navigate = useNavigate();
 
@@ -52,7 +52,7 @@ const AddTask: React.FC = () => {
                 ) : (
                     <Box>
                         <form onSubmit={handleSubmit}>
-                            <Typography variant="h5">Add New Task</Typography>
+                            <Typography variant="h5">Add New Subtask</Typography>
                             <Divider sx={{ mt: 2, mb: 2 }} />
                             <TextField
                                 label="Title"
@@ -145,7 +145,7 @@ const AddTask: React.FC = () => {
                                         },
                                     }}
                                 >
-                                    Add Task
+                                    Add Subtask
                                 </Button>
 
                                 <Button
@@ -165,7 +165,6 @@ const AddTask: React.FC = () => {
                                     Close
                                 </Button>
                             </Box>
-
                         </form>
                     </Box>
                 )}
@@ -187,4 +186,4 @@ const AddTask: React.FC = () => {
     );
 };
 
-export default AddTask;
+export default AddSubtask;

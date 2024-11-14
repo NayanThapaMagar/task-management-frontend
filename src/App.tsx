@@ -7,6 +7,8 @@ import Home from './pages/Home';
 import Task from './pages/Task/TaskList';
 import AddTask from './pages/Task/AddTask';
 import TaskDetail from './pages/Task/TaskDetail';
+import AddSubtask from './pages/Task/AddSubtask';
+import SubtaskDetail from './pages/Task/SubtaskDetail';
 import UserConnection from './pages/userConnection';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
@@ -21,7 +23,9 @@ const App: React.FC = () => {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/tasks" element={<Task />} />
                     <Route path="/tasks/addTask" element={<AddTask />} />
-                    <Route path="/tasks/detail" element={<TaskDetail />} />
+                    <Route path="/tasks/taskDetail" element={<TaskDetail />} />
+                    <Route path="/tasks/addSubtask" element={<AddSubtask />} />
+                    <Route path="/tasks/subtaskDetail" element={<SubtaskDetail />} />
     
                     <Route path="/userConnection" element={<UserConnection />} />
                 </Route>

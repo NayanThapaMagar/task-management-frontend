@@ -15,6 +15,8 @@ import {
     RadioGroup,
     Select,
     TextField,
+    Divider,
+    Typography,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import TaskCard from '../../components/Task/TaskCard';
@@ -26,10 +28,13 @@ const Task: React.FC = () => {
         handleTaskClick,
         priorityFilter,
         handlePriorityFilterChange,
-        view,
-        handleViewChange,
+        taskCategory,
+        handleTaskCategoryChange,
         search,
         handleSearchChange,
+        handleDragStart,
+        handleDragOver,
+        handleDrop,
         loading,
         success,
         error,
@@ -41,7 +46,9 @@ const Task: React.FC = () => {
 
     return (
         <Container>
-            <Box sx={{ p: 3, mt: 2 }}>
+            <Box sx={{ p: 2, mt: 2 }}>
+                <Typography variant="h5">Task List</Typography>
+                <Divider sx={{ mt: 2, mb: 2 }} />
                 <Box mb={3}>
                     <TextField
                         label="Search"
@@ -55,7 +62,7 @@ const Task: React.FC = () => {
                 <Box display="flex" justifyContent="space-between" mb={10}>
                     <FormControl fullWidth margin="normal">
                         <FormLabel>View Tasks</FormLabel>
-                        <RadioGroup row value={view} onChange={handleViewChange}>
+                        <RadioGroup row value={taskCategory} onChange={handleTaskCategoryChange}>
                             <FormControlLabel value="all" control={<Radio />} label="All Tasks" />
                             <FormControlLabel value="myTasks" control={<Radio />} label="My Tasks" />
                             <FormControlLabel value="assignedTasks" control={<Radio />} label="Assigned Tasks" />
@@ -92,6 +99,8 @@ const Task: React.FC = () => {
                         {Object.entries(groupedTasks).map(([status, tasks]) => (
                             <Box
                                 key={status}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, status)}
                                 sx={{
                                     padding: 1,
                                     margin: 1,
@@ -105,7 +114,7 @@ const Task: React.FC = () => {
                             >
                                 <Box mb={2}>
                                     <h3>{status}</h3>
-                                    <TaskCard tasks={tasks} onTaskClick={handleTaskClick} />
+                                    <TaskCard tasks={tasks} onTaskClick={handleTaskClick} draggedTaskStatus={status} onTaskDragStart={handleDragStart} />
                                 </Box>
                             </Box>
                         ))}
@@ -113,7 +122,27 @@ const Task: React.FC = () => {
                 )}
                 <br />
 
-                <Button variant='contained' onClick={() => navigate('/tasks/addTask')}>Add Task</Button>
+                <Button
+                    variant="contained"
+                    onClick={() => navigate('/tasks/addTask')}
+                    sx={{
+                        px: 4,
+                        py: 1.5,
+                        fontWeight: 'bold',
+                        borderRadius: 2,
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        boxShadow: 2,
+                        '&:hover': {
+                            backgroundColor: 'primary.dark',
+                            boxShadow: 3,
+                        },
+                        mt: 2,
+                    }}
+                >
+                    Add Task
+                </Button>
+
 
             </Box>
 

@@ -7,10 +7,11 @@ import useTaskCard from '../../hooks/useTaskCard';
 interface TaskListProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  draggedTaskStatus: string;
+  onTaskDragStart: (e: React.DragEvent<HTMLElement>, task: Task, currentStatus: string) => void;
 }
 
-
-const TaskCard: React.FC<TaskListProps> = ({ tasks, onTaskClick }) => {
+const TaskCard: React.FC<TaskListProps> = ({ tasks, onTaskClick, draggedTaskStatus, onTaskDragStart }) => {
   const {
     getPriorityColor,
     handleTaskMenuClose,
@@ -27,6 +28,8 @@ const TaskCard: React.FC<TaskListProps> = ({ tasks, onTaskClick }) => {
       {tasks.map((task) => (
         <Box
           key={task._id}
+          draggable
+          onDragStart={(e) => onTaskDragStart(e, task, draggedTaskStatus)}
           border={1}
           borderColor="grey.300"
           borderRadius={2}
