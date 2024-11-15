@@ -1,10 +1,12 @@
 import React from 'react';
-import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, OutlinedInput, Divider, Container, Alert, Snackbar, CircularProgress } from '@mui/material';
+import { Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, OutlinedInput, Divider, Box, Alert, Snackbar, CircularProgress, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import PlaylistAddOutlinedIcon from '@mui/icons-material/PlaylistAddOutlined';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import useTaskDetail from '../../hooks/useTaskDetail';
+import useTaskDetail from '../../hooks/task/useTaskDetail';
 import { useNavigate } from 'react-router-dom';
+import SubtaskCard from '../../components/Task/SubtaskCard';
+import CommentBox from '../../components/Comment/CommnetBox';
 
 const TaskDetail: React.FC = () => {
 
@@ -24,13 +26,21 @@ const TaskDetail: React.FC = () => {
         handleAssignedToChange,
         handleComponentClick,
         handleUpdate,
+        groupedSubtasks,
+        handleSubtaskClick,
+        subtaskPriorityFilter,
+        handleSubtaskPriorityFilterChange,
+        subtaskCategory,
+        handleSubtaskCategoryChange,
+        handleDragSubtaskStart,
+        handleDragSubtaskOver,
+        handleDropSubtask,
         handleClose,
         loading,
         success,
         error,
         openSnackbar,
         handleSnackbarClose,
-
     } = useTaskDetail();
 
     const navigate = useNavigate();
@@ -54,7 +64,7 @@ const TaskDetail: React.FC = () => {
     };
 
     return (
-        <Container>
+        <Box>
             {loading ? (
                 <Box display="flex" justifyContent="center" alignItems="center" height="100px">
                     <CircularProgress />
@@ -215,7 +225,108 @@ const TaskDetail: React.FC = () => {
                         </Box>
                     </Box>
 
+                    {/* horizontal dashed line
+                    <Box
+                        sx={{
+                            mt: 2,
+                            mb: 2,
+                            width: '100%',
+                            borderColor: 'divider',
+                        }}
+                    >
+                        <svg
+                            width="100%"
+                            height="1"
+                        >
+                            <line
+                                x1="0"
+                                y1="1"
+                                x2="100%"
+                                y2="1"
+                                stroke="currentColor"
+                                strokeWidth="0.5"
+                                strokeDasharray="15, 7"
+                            />
+                        </svg>
+                    </Box> */}
+
+
+                    {loading ? (
+                        <CircularProgress />
+                    ) : (
+                        <Box mt={4}>
+                            <Typography variant="body1" fontWeight="bold" m={1}>Subtask List</Typography>
+                            <Box>
+                                <Box display="flex" justifyContent="space-between" mb={2}>
+                                    <FormControl fullWidth margin="normal">
+                                        {/* <FormLabel>View Subtasks</FormLabel> */}
+                                        <RadioGroup row value={subtaskCategory} onChange={handleSubtaskCategoryChange}>
+                                            <FormControlLabel value="all" control={<Radio />} label="All Tasks" />
+                                            <FormControlLabel value="myTasks" control={<Radio />} label="My Tasks" />
+                                            <FormControlLabel value="assignedTasks" control={<Radio />} label="Assigned Tasks" />
+                                        </RadioGroup>
+                                    </FormControl>
+                                    <FormControl variant="outlined" style={{ width: '150px' }} margin="normal">
+                                        <InputLabel>Priority</InputLabel>
+                                        <Select
+                                            value={subtaskPriorityFilter}
+                                            onChange={handleSubtaskPriorityFilterChange}
+                                            label="Priority"
+                                        >
+                                            <MenuItem value="all">All</MenuItem>
+                                            <MenuItem value="high">High</MenuItem>
+                                            <MenuItem value="medium">Medium</MenuItem>
+                                            <MenuItem value="low">Low</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+
+                                {Object.values(groupedSubtasks).some((subtaskArray) => subtaskArray.length > 0)
+                                    && <Box
+                                        gap={1}
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            overflowX: 'auto',
+                                            flexWrap: 'nowrap',
+                                        }}
+                                    >
+                                        {Object.entries(groupedSubtasks).map(([status, subtasks]) => (
+                                            <Box
+                                                key={status}
+                                                onDragOver={handleDragSubtaskOver}
+                                                onDrop={(e) => handleDropSubtask(e, status)}
+                                                sx={{
+                                                    padding: 1,
+                                                    margin: 1,
+                                                    border: '1px solid #ccc',
+                                                    borderRadius: '8px',
+                                                    boxShadow: 2,
+                                                    backgroundColor: 'background.paper',
+                                                    minWidth: '150px',
+                                                    minHeight: '150px',
+                                                    flexGrow: 1,
+                                                    flexBasis: 0,
+                                                    '&:hover': {
+                                                        borderColor: 'currentcolor',
+                                                    },
+                                                }}
+                                            >
+                                                <Box mb={2}>
+                                                    <h3>{status}</h3>
+                                                    <SubtaskCard taskId={selectedTask?._id as string} subtasks={subtasks} onSubtaskClick={handleSubtaskClick} draggedSubtaskStatus={status} onSubtaskDragStart={handleDragSubtaskStart} />
+                                                </Box>
+                                            </Box>
+                                        ))}
+                                    </Box>}
+
+                                <CommentBox taskId={selectedTask?._id as string} subtaskId={null} />
+                            </Box>
+                        </Box>
+                    )}
+
                     <Divider sx={{ mt: 2, mb: 2 }} />
+
                     <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                         <Button
                             color="secondary"
@@ -293,7 +404,7 @@ const TaskDetail: React.FC = () => {
                     </Alert>
                 </Snackbar>
             )}
-        </Container>
+        </Box>
     );
 };
 

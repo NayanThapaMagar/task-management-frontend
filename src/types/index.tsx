@@ -1,11 +1,12 @@
-export interface UserConnection {
+export interface User {
   _id: string;
   username: string;
   email: string;
+  // userConnection: string[];
 }
 
 export interface Comment {
-  userId: string;
+  user: User;
   text: string;
   createdAt: Date;
 }

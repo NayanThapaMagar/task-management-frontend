@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserConnections, addUserConnection, removeUserConnection, resetMessages, selectAllConnections } from '../features/userConnectionSlice';
-import { UserConnection as UserConnectionType } from '../types';
+import { User as UserConnectionType } from '../types';
 import { AppDispatch, RootState } from '../store';
 
 const useUserConnections = () => {

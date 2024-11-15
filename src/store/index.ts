@@ -7,6 +7,11 @@ import taskReducer from '../features/taskSlice';
 import subtaskReducer from '../features/subtaskSlice';
 
 // Define the persist configuration
+const authPersistConfig = {
+    key: 'auth',
+    storage,
+    whitelist: ['user'],
+};
 const taskPersistConfig = {
     key: 'tasks',
     storage,
@@ -18,13 +23,14 @@ const subtaskPersistConfig = {
     whitelist: ['selectedSubtask'],
 };
 
-// Wrap taskReducer with persistReducer to persist only selectedTask
+// Wrap Reducer with persistReducer to persist only selected values
+const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 const persistedTaskReducer = persistReducer(taskPersistConfig, taskReducer);
 const persistedsubTaskReducer = persistReducer(subtaskPersistConfig, subtaskReducer);
 
 export const store = configureStore({
     reducer: {
-        auth: authReducer,
+        auth: persistedAuthReducer,
         userConnection: userConnectionReducer,
         tasks: persistedTaskReducer,
         subtasks: persistedsubTaskReducer,

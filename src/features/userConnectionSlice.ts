@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import axiosInstance from '../api/axios';
-import { UserConnection } from '../types';
+import { User } from '../types';
 
 const BASE_URL = '/connections';
 
 interface UserConnectionState {
-    connections: UserConnection[];
+    connections: User[];
     loading: boolean;
     error: string | null;
     success: string | null;

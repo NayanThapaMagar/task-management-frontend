@@ -3,9 +3,9 @@ import { marked } from "marked";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { updateSubtask, resetSelectedSubtask, setError, resetMessages } from "../features/subtaskSlice";
-import { selectAllConnections, fetchUserConnections } from "../features/userConnectionSlice";
-import { AppDispatch, RootState } from "../store";
+import { updateSubtask, resetSelectedSubtask, setError, resetMessages } from "../../features/subtaskSlice";
+import { selectAllConnections, fetchUserConnections } from "../../features/userConnectionSlice";
+import { AppDispatch, RootState } from "../../store";
 import htmlToMarkdown from "@wcj/html-to-markdown";
 
 const useSubtaskDetail = () => {
@@ -109,6 +109,7 @@ const useSubtaskDetail = () => {
 
     return {
         editMode,
+        selectedTask,
         selectedSubtask,
         title,
         description,

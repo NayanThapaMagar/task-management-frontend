@@ -1,25 +1,21 @@
 import { useState, FormEvent } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { register } from "../features/authSlice";
-import { AppDispatch } from "../store";
+import { login } from "../../features/authSlice";
+import { AppDispatch } from "../../store";
 
-
-const useRegister = () => {
+const useLogin = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
-        name: '',
         email: '',
         password: '',
-        confirmPassword: '',
     });
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [emailError, setEmailError] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +29,7 @@ const useRegister = () => {
         setLoading(true);
         setError(null);
 
-        const { password, confirmPassword, email } = formData;
+        const { email, password } = formData;
 
         // Validate email format
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -43,18 +39,11 @@ const useRegister = () => {
             return;
         }
 
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            setError('Passwords do not match. Please try again.');
-            setLoading(false);
-            return;
-        }
-
         try {
-            await dispatch(register({ username: formData.name, email: formData.email, password })).unwrap();
-            navigate('/'); // Redirect to the dashboard on success
+            await dispatch(login({ email, password })).unwrap();
+            navigate('/');
         } catch (err: any) {
-            setError(err || 'Registration failed. Please try again.');
+            setError(err || 'Login failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -64,10 +53,6 @@ const useRegister = () => {
         setShowPassword((prev) => !prev);
     };
 
-    const handleClickShowConfirmPassword = () => {
-        setShowConfirmPassword((prev) => !prev);
-    };
-
     return {
         handleSubmit,
         formData,
@@ -75,12 +60,10 @@ const useRegister = () => {
         error,
         loading,
         showPassword,
-        showConfirmPassword,
         handleChange,
         handleClickShowPassword,
-        handleClickShowConfirmPassword,
     };
 
 }
 
-export default useRegister;
+export default useLogin;

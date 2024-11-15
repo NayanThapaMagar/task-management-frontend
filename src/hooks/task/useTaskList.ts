@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { SelectChangeEvent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Task as TaskType } from '../types';
+import { Task as TaskType } from '../../types';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAllTasks, selectMyTasks, selectAssignedTasks, fetchAllTasks, fetchMyTasks, fetchAssignedTasks, updateTaskStatus, setSelectedTask, resetMessages } from '../features/taskSlice';
-import { AppDispatch, RootState } from '../store';
+import { selectAllTasks, selectMyTasks, selectAssignedTasks, fetchAllTasks, fetchMyTasks, fetchAssignedTasks, updateTaskStatus, setSelectedTask, resetMessages } from '../../features/taskSlice';
+import { AppDispatch, RootState } from '../../store';
 
 const useTaskList = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -17,16 +17,16 @@ const useTaskList = () => {
 
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [search, setSearch] = useState('');
-    const [priorityFilter, setPriorityFilter] = useState('all');
+    const [taskPriorityFilter, setTaskPriorityFilter] = useState('all');
     const [taskCategory, setTaskCategory] = useState('all');
 
     const [listTasks, setListTasks] = useState<TaskType[]>([]);
 
     const [draggedTask, setDraggedTask] = useState<{ task: TaskType; currentStatus: string } | null>(null);
 
-    const fetchData = async () => {
+    const fetchTasks = async () => {
         const query: Record<string, string> = {};
-        if (priorityFilter !== 'all') query.priority = priorityFilter;
+        if (taskPriorityFilter !== 'all') query.priority = taskPriorityFilter;
 
         if (taskCategory === 'all') {
             await dispatch(fetchAllTasks({ ...query, page: 1, limit: 10 }));
@@ -38,8 +38,8 @@ const useTaskList = () => {
     };
 
     useEffect(() => {
-        fetchData();
-    }, [priorityFilter, taskCategory, dispatch]);
+        fetchTasks();
+    }, [taskPriorityFilter, taskCategory, dispatch]);
 
     useEffect(() => {
         const tasks = taskCategory === 'all' ? allTasks : taskCategory === 'myTasks' ? myTasks : assignedTasks;
@@ -51,8 +51,8 @@ const useTaskList = () => {
         setSearch(e.target.value);
     };
 
-    const handlePriorityFilterChange = (e: SelectChangeEvent<string>) => {
-        setPriorityFilter(e.target.value);
+    const handleTaskPriorityFilterChange = (e: SelectChangeEvent<string>) => {
+        setTaskPriorityFilter(e.target.value);
     };
 
     const handleTaskCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,17 +64,17 @@ const useTaskList = () => {
         navigate('/tasks/taskDetail');
     };
 
-    const handleDragStart = (e: React.DragEvent<HTMLElement>, task: TaskType, currentStatus: string) => {
+    const handleDragTaskStart = (e: React.DragEvent<HTMLElement>, task: TaskType, currentStatus: string) => {
         e.dataTransfer.effectAllowed = "move";
         setDraggedTask({ task, currentStatus });
     };
 
-    const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
+    const handleDragTaskOver = (e: React.DragEvent<HTMLElement>) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
     };
 
-    const handleDrop = async (e: React.DragEvent<HTMLElement>, newStatus: string) => {
+    const handleDropTask = async (e: React.DragEvent<HTMLElement>, newStatus: string) => {
         e.preventDefault();
         if (draggedTask && draggedTask.currentStatus !== newStatus) {
             await dispatch(updateTaskStatus({ taskId: draggedTask.task._id, status: newStatus.toLocaleLowerCase() }))
@@ -102,15 +102,15 @@ const useTaskList = () => {
     return {
         groupedTasks,
         handleTaskClick,
-        priorityFilter,
-        handlePriorityFilterChange,
+        taskPriorityFilter,
+        handleTaskPriorityFilterChange,
         taskCategory,
         handleTaskCategoryChange,
         search,
         handleSearchChange,
-        handleDragStart,
-        handleDragOver,
-        handleDrop,
+        handleDragTaskStart,
+        handleDragTaskOver,
+        handleDropTask,
         loading,
         success,
         error,

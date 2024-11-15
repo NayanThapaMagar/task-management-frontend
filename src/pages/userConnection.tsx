@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Box, Typography, IconButton, TextField, Menu, MenuItem, CircularProgress, Alert, Snackbar } from '@mui/material';
 import { Add, Cancel, MoreHoriz, PersonAdd } from '@mui/icons-material';
 import useUserConnections from '../hooks/useUserConnections';
-import { UserConnection as UserConnectionType } from '../types';
+import { User as UserConnectionType } from '../types';
 
-const UserConnection: React.FC = () => {
+const User: React.FC = () => {
     const {
         filteredConnections,
         searchQuery,
@@ -198,4 +198,4 @@ const UserConnection: React.FC = () => {
     );
 };
 
-export default UserConnection;
+export default User;

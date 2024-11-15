@@ -11,7 +11,7 @@ import {
     InputAdornment,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import useRegister from '../hooks/useRegister';
+import useRegister from '../hooks/auth/useRegister';
 
 const Register: React.FC = () => {
 

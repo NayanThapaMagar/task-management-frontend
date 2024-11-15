@@ -1,41 +1,42 @@
 import React from 'react';
 import { Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
-import { Task } from '../../types';
+import { SubTask } from '../../types';
 import { MoreHoriz } from '@mui/icons-material';
-import useTaskCard from '../../hooks/task/useTaskCard';
+import useSubtaskCard from '../../hooks/subtask/useSubtaskCard';
 
-interface TaskCardProps {
-  tasks: Task[];
-  onTaskClick: (task: Task) => void;
-  draggedTaskStatus: string;
-  onTaskDragStart: (e: React.DragEvent<HTMLElement>, task: Task, currentStatus: string) => void;
+interface SubtaskCardProps {
+  taskId: string;
+  subtasks: SubTask[];
+  onSubtaskClick: (subtask: SubTask) => void;
+  draggedSubtaskStatus: string;
+  onSubtaskDragStart: (e: React.DragEvent<HTMLElement>, subtask: SubTask, currentStatus: string) => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStatus, onTaskDragStart }) => {
+const SubtaskCard: React.FC<SubtaskCardProps> = ({ taskId, subtasks, onSubtaskClick, draggedSubtaskStatus, onSubtaskDragStart }) => {
   const {
     getPriorityColor,
-    handleTaskMenuClose,
-    handleTaskMenuClick,
-    setCurrentTaskOnMenu,
+    handleSubtaskMenuClose,
+    handleSubtaskMenuClick,
+    setCurrentSubtaskOnMenu,
     anchorEl,
-    handleDeleteTask,
-  } = useTaskCard();
+    handleDeleteSubtask,
+  } = useSubtaskCard();
 
 
 
   return (
     <Box width="100%">
-      {tasks.map((task) => (
+      {subtasks.map((subtask) => (
         <Box
-          key={task._id}
+          key={subtask._id}
           draggable
-          onDragStart={(e) => onTaskDragStart(e, task, draggedTaskStatus)}
+          onDragStart={(e) => onSubtaskDragStart(e, subtask, draggedSubtaskStatus)}
           border={1}
           borderColor="grey.300"
           borderRadius={2}
           padding={2}
           marginBottom={2}
-          onClick={() => onTaskClick(task)}
+          onClick={() => onSubtaskClick(subtask)}
           sx={{
             cursor: 'pointer',
             padding: 2,
@@ -46,32 +47,32 @@ const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStat
             backgroundColor: 'background.paper',
             transition: 'transform 0.1s, opacity 0.1s',
             '&:hover': {
-               backgroundColor: 'grey.100',
-                boxShadow: 3, 
-                transform: 'scale(1.02)', 
+              backgroundColor: 'grey.100',
+              boxShadow: 3,
+              transform: 'scale(1.02)',
             },
             '&:active': {
-                cursor: 'grabbing', 
-                opacity: 0.9, 
-                boxShadow: 5, 
+              cursor: 'grabbing',
+              opacity: 0.9,
+              boxShadow: 5,
             },
           }}
-          aria-label={`Task titled ${task.title} with priority ${task.priority}`}
+          aria-label={`SubTask titled ${subtask.title} with priority ${subtask.priority}`}
         >
           <Box sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <Typography variant="h6">{task.title}</Typography>
+            <Typography variant="h6">{subtask.title}</Typography>
             <IconButton
               aria-label="more"
               aria-controls="long-menu"
               aria-haspopup="true"
               onClick={(e) => {
                 e.stopPropagation();
-                setCurrentTaskOnMenu(task)
-                handleTaskMenuClick(e);
+                setCurrentSubtaskOnMenu(subtask)
+                handleSubtaskMenuClick(e);
               }}
             >
               <MoreHoriz />
@@ -79,23 +80,23 @@ const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStat
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
-              onClose={handleTaskMenuClose}
-              onClick={handleTaskMenuClose}
+              onClose={handleSubtaskMenuClose}
+              onClick={handleSubtaskMenuClose}
             >
-              <MenuItem onClick={handleDeleteTask}>Delete</MenuItem>
+              <MenuItem onClick={() => handleDeleteSubtask(taskId)}>Delete</MenuItem>
             </Menu>
           </Box>
           <Typography variant="body1">
             Priority:
             <span
               style={{
-                color: getPriorityColor(task.priority),
+                color: getPriorityColor(subtask.priority),
                 fontWeight: 'bold',
                 padding: '2px 6px',
                 borderRadius: '4px',
               }}
             >
-              {task.priority}
+              {subtask.priority}
             </span>
           </Typography>
         </Box>
@@ -104,4 +105,4 @@ const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStat
   );
 };
 
-export default TaskCard;
+export default SubtaskCard;

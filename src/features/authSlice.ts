@@ -30,7 +30,7 @@ export const register = createAsyncThunk(
 
             return { token, user };
         } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response.data.message || 'Registration failed');
+            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Registration failed');
         }
     }
 );
@@ -48,7 +48,7 @@ export const login = createAsyncThunk(
 
             return { token, user };
         } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response.data.message || 'Login failed');
+            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
         }
     }
 );
@@ -72,7 +72,6 @@ const authSlice = createSlice({
             // Register Cases
             .addCase(register.pending, (state) => {
                 state.loading = true;
-                state.error = null;
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.loading = false;
@@ -88,7 +87,6 @@ const authSlice = createSlice({
             // Login Cases
             .addCase(login.pending, (state) => {
                 state.loading = true;
-                state.error = null;
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = false;

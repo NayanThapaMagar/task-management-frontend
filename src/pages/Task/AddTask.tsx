@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    Box,
     TextField,
     Button,
     Typography,
@@ -10,7 +9,7 @@ import {
     InputLabel,
     Chip,
     OutlinedInput,
-    Container,
+    Box,
     CircularProgress,
     Alert,
     Snackbar,
@@ -18,7 +17,7 @@ import {
 } from '@mui/material';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import useAddTask from '../../hooks/useAddTask';
+import useAddTask from '../../hooks/task/useAddTask';
 import { useNavigate } from 'react-router-dom';
 
 const AddTask: React.FC = () => {
@@ -43,7 +42,7 @@ const AddTask: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <Container>
+        <Box>
             <Box sx={{ p: 2, mt: 2 }}>
                 {loading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" height="100px">
@@ -183,7 +182,7 @@ const AddTask: React.FC = () => {
                     </Alert>
                 </Snackbar>
             )}
-        </Container>
+        </Box>
     );
 };
 

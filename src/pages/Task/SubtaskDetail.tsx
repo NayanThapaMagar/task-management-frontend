@@ -1,14 +1,17 @@
 import React from 'react';
-import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, OutlinedInput, Divider, Container, Alert, Snackbar, CircularProgress } from '@mui/material';
+import { Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, OutlinedInput, Divider, Box, Alert, Snackbar, CircularProgress } from '@mui/material';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import useSubtaskDetail from '../../hooks/useSubtaskDetail';
+import useSubtaskDetail from '../../hooks/subtask/useSubtaskDetail';
 import { useNavigate } from 'react-router-dom';
+import CommentBox from '../../components/Comment/CommnetBox'
+import CommentCard from '../../components/Comment/CommentCard'
 
 const TaskDetail: React.FC = () => {
 
     const {
         editMode,
+        selectedTask,
         selectedSubtask,
         title,
         description,
@@ -53,14 +56,14 @@ const TaskDetail: React.FC = () => {
     };
 
     return (
-        <Container>
+        <Box>
             {loading ? (
                 <Box display="flex" justifyContent="center" alignItems="center" height="100px">
                     <CircularProgress />
                 </Box>
             ) : (
                 <Box sx={{ p: 2, mt: 2 }}>
-                    <Typography variant="h5">Task Detail</Typography>
+                    <Typography variant="h5">Subtask Detail</Typography>
                     <Divider sx={{ mt: 2, mb: 2 }} />
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Box margin="normal">
@@ -214,6 +217,12 @@ const TaskDetail: React.FC = () => {
                         </Box>
                     </Box>
 
+                    <Typography variant="body1" fontWeight="bold" m={1}>Activity</Typography>
+
+                    <CommentBox taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
+
+                    {/* <CommentCard /> */}
+
                     <Divider sx={{ mt: 2, mb: 2 }} />
 
                     <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
@@ -270,7 +279,7 @@ const TaskDetail: React.FC = () => {
                     </Alert>
                 </Snackbar>
             )}
-        </Container>
+        </Box>
     );
 };
 

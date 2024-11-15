@@ -1,20 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { createSubtask, setSelectedSubtask, resetMessages, setError } from '../features/subtaskSlice';
-import { fetchUserConnections, selectAllConnections } from '../features/userConnectionSlice';
-import { AppDispatch, RootState } from '../store';
-import { TaskCreate } from '../types';
+import { createTask, setSelectedTask, resetMessages, setError } from '../../features/taskSlice';
+import { fetchUserConnections, selectAllConnections } from '../../features/userConnectionSlice';
+import { AppDispatch, RootState } from '../../store';
+import { TaskCreate } from '../../types';
 import { SelectChangeEvent } from '@mui/material';
 import htmlToMarkdown from "@wcj/html-to-markdown";
 
-const useAddSubtask = () => {
+const useAddTask = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { error, loading, success } = useSelector((state: RootState) => state.subtasks);
-    const { selectedTask } = useSelector((state: RootState) => state.tasks);
-
-    const taskId = selectedTask?._id as string
+    const { error, loading, success } = useSelector((state: RootState) => state.tasks);
 
     const allConnections = useSelector(selectAllConnections);
 
@@ -46,19 +43,20 @@ const useAddSubtask = () => {
             return;
         }
 
-        const subtaskData: TaskCreate = {
+        const taskData: TaskCreate = {
             title,
             description: markedDownDescription,
             priority,
             assignedTo: assignedTo.length > 0 ? assignedTo : []
         };
 
-        const dispatchResponse = await dispatch(createSubtask({ taskId, subtaskData }));
+        const dispatchResponse = await dispatch(createTask(taskData));
 
         if (dispatchResponse) {
-            dispatch(setSelectedSubtask(dispatchResponse.payload.subtask))
+            dispatch(setSelectedTask(dispatchResponse.payload.task))
         }
-        navigate('/tasks/subtaskDetail');
+
+        navigate('/tasks/taskDetail');
     };
 
     // Handle changes in the assignedTo select
@@ -88,7 +86,6 @@ const useAddSubtask = () => {
         priority,
         setPriority,
         assignedTo,
-        setAssignedTo,
         allConnections,
         loading,
         success,
@@ -100,4 +97,4 @@ const useAddSubtask = () => {
     };
 };
 
-export default useAddSubtask;
+export default useAddTask;

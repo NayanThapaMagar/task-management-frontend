@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    Container,
     Box,
     Snackbar,
     Alert,
@@ -20,21 +19,21 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import TaskCard from '../../components/Task/TaskCard';
-import useTaskList from '../../hooks/useTaskList';
+import useTaskList from '../../hooks/task/useTaskList';
 
 const Task: React.FC = () => {
     const {
         groupedTasks,
         handleTaskClick,
-        priorityFilter,
-        handlePriorityFilterChange,
+        taskPriorityFilter,
+        handleTaskPriorityFilterChange,
         taskCategory,
         handleTaskCategoryChange,
         search,
         handleSearchChange,
-        handleDragStart,
-        handleDragOver,
-        handleDrop,
+        handleDragTaskStart,
+        handleDragTaskOver,
+        handleDropTask,
         loading,
         success,
         error,
@@ -45,7 +44,7 @@ const Task: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <Container>
+        <Box>
             <Box sx={{ p: 2, mt: 2 }}>
                 <Typography variant="h5">Task List</Typography>
                 <Divider sx={{ mt: 2, mb: 2 }} />
@@ -59,7 +58,9 @@ const Task: React.FC = () => {
                         margin="normal"
                     />
                 </Box>
-                <Box display="flex" justifyContent="space-between" mb={10}>
+
+
+                <Box display="flex" justifyContent="space-between" mb={5}>
                     <FormControl fullWidth margin="normal">
                         <FormLabel>View Tasks</FormLabel>
                         <RadioGroup row value={taskCategory} onChange={handleTaskCategoryChange}>
@@ -71,8 +72,8 @@ const Task: React.FC = () => {
                     <FormControl variant="outlined" style={{ width: '150px' }} margin="normal">
                         <InputLabel>Priority</InputLabel>
                         <Select
-                            value={priorityFilter}
-                            onChange={handlePriorityFilterChange}
+                            value={taskPriorityFilter}
+                            onChange={handleTaskPriorityFilterChange}
                             label="Priority"
                         >
                             <MenuItem value="all">All</MenuItem>
@@ -87,20 +88,19 @@ const Task: React.FC = () => {
                     <CircularProgress />
                 ) : (
                     <Box
-                        gap={2}
+                        gap={1}
                         sx={{
                             display: 'flex',
                             flexDirection: 'row',
                             overflowX: 'auto',
                             flexWrap: 'nowrap',
-                            p: 1,
                         }}
                     >
                         {Object.entries(groupedTasks).map(([status, tasks]) => (
                             <Box
                                 key={status}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDrop(e, status)}
+                                onDragOver={handleDragTaskOver}
+                                onDrop={(e) => handleDropTask(e, status)}
                                 sx={{
                                     padding: 1,
                                     margin: 1,
@@ -108,18 +108,24 @@ const Task: React.FC = () => {
                                     borderRadius: '8px',
                                     boxShadow: 2,
                                     backgroundColor: 'background.paper',
-                                    minWidth: '250px',
+                                    minWidth: '150px',
                                     minHeight: '150px',
+                                    flexGrow: 1,
+                                    flexBasis: 0,
+                                    '&:hover': {
+                                        borderColor: 'currentcolor', 
+                                    },
                                 }}
                             >
                                 <Box mb={2}>
                                     <h3>{status}</h3>
-                                    <TaskCard tasks={tasks} onTaskClick={handleTaskClick} draggedTaskStatus={status} onTaskDragStart={handleDragStart} />
+                                    <TaskCard tasks={tasks} onTaskClick={handleTaskClick} draggedTaskStatus={status} onTaskDragStart={handleDragTaskStart} />
                                 </Box>
                             </Box>
                         ))}
                     </Box>
                 )}
+
                 <br />
 
                 <Button
@@ -158,7 +164,7 @@ const Task: React.FC = () => {
                     </Alert>
                 </Snackbar>
             )}
-        </Container>
+        </Box>
     );
 };
 
