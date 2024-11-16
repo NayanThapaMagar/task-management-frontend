@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import axiosInstance from '../api/axios';
-import { SubTask } from '../types';
+import { SubTask, Comment } from '../types';
 
 const BASE_URL = '/subtasks';
 
@@ -9,6 +9,7 @@ interface SubtaskState {
     subtasks: SubTask[];
     mySubtasks: SubTask[];
     assignedSubtasks: SubTask[];
+    comments: Comment[];
     loading: boolean;
     error: string | null;
     success: string | null;
@@ -22,6 +23,7 @@ const initialState: SubtaskState = {
     subtasks: [],
     mySubtasks: [],
     assignedSubtasks: [],
+    comments: [],
     loading: false,
     error: null,
     success: null,
@@ -128,6 +130,18 @@ export const updateSubtaskStatus = createAsyncThunk(
     }
 );
 
+// fetch all subtask comments
+export const fetchAllSubtaskComments = createAsyncThunk(
+    'subtasks/fetchComments',
+    async ({ taskId, subtaskId }: { taskId: string, subtaskId: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/${subtaskId}/comments`);
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error fetching comments');
+        }
+    }
+);
 // Add comment to subtask
 export const addSubtaskComment = createAsyncThunk(
     'subtasks/addComment',
@@ -137,6 +151,30 @@ export const addSubtaskComment = createAsyncThunk(
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error adding comment');
+        }
+    }
+);
+// edit subtask comment
+export const editSubtaskComment = createAsyncThunk(
+    'subtasks/editComment',
+    async ({ taskId, subtaskId, commentId, text }: { taskId: string, subtaskId: string; commentId: string, text: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.put(`${BASE_URL}/${taskId}/${subtaskId}/comments/${commentId}`, { text });
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error editing comment');
+        }
+    }
+);
+// delete subtask comment
+export const deleteSubtaskComment = createAsyncThunk(
+    'subtasks/deleteComment',
+    async ({ taskId, subtaskId, commentId }: { taskId: string, subtaskId: string; commentId: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.delete(`${BASE_URL}/${taskId}/${subtaskId}/comments/${commentId}`);
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error deleting comment');
         }
     }
 );
@@ -152,9 +190,6 @@ const subtaskSlice = createSlice({
         },
         setError(state, action: PayloadAction<string>) {
             state.error = action.payload;
-        },
-        setAssignedSubtasks: (state, action: PayloadAction<SubTask[]>) => {
-            state.assignedSubtasks = action.payload;
         },
         setSelectedSubtask: (state, action: PayloadAction<SubTask>) => {
             state.selectedSubtask = action.payload;
@@ -236,8 +271,6 @@ const subtaskSlice = createSlice({
                 state.loading = true;
             })
             .addCase(updateSubtask.fulfilled, (state, action: PayloadAction<any>) => {
-                const index = state.subtasks.findIndex((subtask) => subtask._id === action.payload.updatedSubtask._id);
-                if (index !== -1) state.subtasks[index] = action.payload.updatedSubtask;
                 state.selectedSubtask = action.payload.updatedSubtask;
                 state.success = action.payload.message;
                 state.loading = false;
@@ -262,21 +295,6 @@ const subtaskSlice = createSlice({
                 state.error = action.payload;
             })
 
-            // Add comment to subtask
-            .addCase(addSubtaskComment.pending, (state) => {
-                state.loading = true;
-            })
-            .addCase(addSubtaskComment.fulfilled, (state, action: PayloadAction<any>) => {
-                const index = state.subtasks.findIndex((subtask) => subtask._id === action.payload.subtask._id);
-                if (index !== -1) state.subtasks[index].comments.push(action.payload.comment);
-                state.success = action.payload.message;
-                state.loading = false;
-            })
-            .addCase(addSubtaskComment.rejected, (state, action: PayloadAction<any>) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
-
             // Delete subtask
             .addCase(deleteSubtask.pending, (state) => {
                 state.loading = true;
@@ -291,15 +309,89 @@ const subtaskSlice = createSlice({
             .addCase(deleteSubtask.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+
+            // fetch all subtask comments
+            .addCase(fetchAllSubtaskComments.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchAllSubtaskComments.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedSubtask) {
+                    state.comments = action.payload.comments
+                } else {
+                    state.error = 'Subtask not set';
+                }
+                state.loading = false;
+            })
+            .addCase(fetchAllSubtaskComments.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Add comment to subtask
+            .addCase(addSubtaskComment.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(addSubtaskComment.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedSubtask) {
+                    state.comments.push(action.payload.comment)
+                    state.success = action.payload.message;
+                } else {
+                    state.error = 'Subtask not set';
+                }
+                state.loading = false;
+            })
+            .addCase(addSubtaskComment.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // edit subtask comment 
+            .addCase(editSubtaskComment.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(editSubtaskComment.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedSubtask) {
+                    const index = state.comments.findIndex((comment) => comment._id === action.payload.editedComment._id);
+                    if (index !== -1) state.comments[index] = action.payload.editedComment
+                    state.success = action.payload.message;
+                } else {
+                    state.error = 'Subtask not set';
+                }
+                state.loading = false;
+            })
+            .addCase(editSubtaskComment.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // delete subtask comment 
+            .addCase(deleteSubtaskComment.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(deleteSubtaskComment.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedSubtask) {
+                    state.comments = state.comments.filter((comment) => comment._id !== action.payload.deletedCommentId)
+                    state.success = action.payload.message;
+                } else {
+                    state.error = 'Subtask not set';
+                }
+                state.loading = false;
+            })
+            .addCase(deleteSubtaskComment.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
             });
     },
 });
 
-export const { resetMessages, setError, setAssignedSubtasks, setSelectedSubtask, resetSelectedSubtask } = subtaskSlice.actions;
+export const { resetMessages, setError, setSelectedSubtask, resetSelectedSubtask } = subtaskSlice.actions;
 
 // Selectors
 export const selectAllSubtasks = (state: RootState) => state.subtasks.subtasks;
 export const selectMySubtasks = (state: RootState) => state.subtasks.mySubtasks;
 export const selectAssignedSubtasks = (state: RootState) => state.subtasks.assignedSubtasks;
+
+export const selectAllSubtaskComments = (state: RootState) => state.subtasks.comments;
 
 export default subtaskSlice.reducer;

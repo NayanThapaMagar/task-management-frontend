@@ -7,6 +7,7 @@ import useTaskDetail from '../../hooks/task/useTaskDetail';
 import { useNavigate } from 'react-router-dom';
 import SubtaskCard from '../../components/Task/SubtaskCard';
 import CommentBox from '../../components/Comment/CommnetBox';
+import CommentCard from '../../components/Comment/CommentCard'
 
 const TaskDetail: React.FC = () => {
 
@@ -18,6 +19,7 @@ const TaskDetail: React.FC = () => {
         priority,
         assignedTo,
         allConnections,
+        allTaskComments,
         setTitle,
         setDescription,
         setPriority,
@@ -320,12 +322,9 @@ const TaskDetail: React.FC = () => {
                                         ))}
                                     </Box>}
 
-                                <CommentBox taskId={selectedTask?._id as string} subtaskId={null} />
                             </Box>
                         </Box>
                     )}
-
-                    <Divider sx={{ mt: 2, mb: 2 }} />
 
                     <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                         <Button
@@ -349,6 +348,8 @@ const TaskDetail: React.FC = () => {
                             Add Subtask
                         </Button>
                     </Box>
+
+                    <Divider sx={{ mt: 2, mb: 2 }} />
 
                     <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
                         {(editMode.title || editMode.description || editMode.priority || editMode.assignedTo) && (
@@ -388,6 +389,12 @@ const TaskDetail: React.FC = () => {
                             Close
                         </Button>
                     </Box>
+
+                    <Typography variant="body1" fontWeight="bold" mt={4}>Activity</Typography>
+
+                    <CommentBox taskId={selectedTask?._id as string} subtaskId={null} />
+
+                    <CommentCard comments={allTaskComments} taskId={selectedTask?._id as string} subtaskId={null} />
 
                 </Box >
             )}

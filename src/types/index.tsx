@@ -2,13 +2,14 @@ export interface User {
   _id: string;
   username: string;
   email: string;
-  // userConnection: string[];
 }
 
 export interface Comment {
-  user: User;
+  _id: string;
+  userId: User;
   text: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface TaskCreate {

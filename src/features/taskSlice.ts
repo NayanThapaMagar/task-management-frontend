@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import axiosInstance from '../api/axios';
-import { Task } from '../types';
+import { Task, Comment } from '../types';
 
 const BASE_URL = '/tasks';
 
@@ -9,6 +9,7 @@ interface TaskState {
     tasks: Task[];
     myTasks: Task[];
     assignedTasks: Task[];
+    comments: Comment[];
     loading: boolean;
     error: string | null;
     success: string | null;
@@ -22,6 +23,7 @@ const initialState: TaskState = {
     tasks: [],
     myTasks: [],
     assignedTasks: [],
+    comments: [],
     loading: false,
     error: null,
     success: null,
@@ -104,7 +106,7 @@ export const updateTask = createAsyncThunk(
     }
 );
 
-// Update Task Status /:taskId/status
+// Update Task Status
 export const updateTaskStatus = createAsyncThunk(
     'tasks/updateStatus',
     async ({ taskId, status }: { taskId: string; status: string }, { rejectWithValue }) => {
@@ -117,7 +119,31 @@ export const updateTaskStatus = createAsyncThunk(
     }
 );
 
-// Add Comment to Task /:taskId/comments
+export const deleteTask = createAsyncThunk(
+    'tasks/delete',
+    async (taskId: string, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.delete(`${BASE_URL}/${taskId}`);
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error deleting task');
+        }
+    }
+);
+
+// fetch all task comments
+export const fetchAllTaskComments = createAsyncThunk(
+    'tasks/fetchComments',
+    async (taskId: string, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/comments`);
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error fetching comments');
+        }
+    }
+);
+// Add Comment to Task 
 export const addTaskComment = createAsyncThunk(
     'tasks/addComment',
     async ({ taskId, text }: { taskId: string; text: string }, { rejectWithValue }) => {
@@ -129,15 +155,27 @@ export const addTaskComment = createAsyncThunk(
         }
     }
 );
-
-export const deleteTask = createAsyncThunk(
-    'tasks/delete',
-    async (taskId: string, { rejectWithValue }) => {
+// edit task comment
+export const editTaskComment = createAsyncThunk(
+    'task/editComment',
+    async ({ taskId, commentId, text }: { taskId: string, commentId: string, text: string }, { rejectWithValue }) => {
         try {
-            const { data } = await axiosInstance.delete(`${BASE_URL}/${taskId}`);
+            const { data } = await axiosInstance.put(`${BASE_URL}/${taskId}/comments/${commentId}`, { text });
             return data;
         } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || 'Error deleting task');
+            return rejectWithValue(error.response?.data?.message || 'Error editing comment');
+        }
+    }
+);
+// delete task comment
+export const deleteTaskComment = createAsyncThunk(
+    'tasks/deleteComment',
+    async ({ taskId, commentId }: { taskId: string, commentId: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.delete(`${BASE_URL}/${taskId}/comments/${commentId}`);
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error deleting comment');
         }
     }
 );
@@ -273,21 +311,6 @@ const taskSlice = createSlice({
                 state.error = action.payload;
             })
 
-            // Add comment to task
-            .addCase(addTaskComment.pending, (state) => {
-                state.loading = true;
-            })
-            .addCase(addTaskComment.fulfilled, (state, action: PayloadAction<any>) => {
-                const index = state.tasks.findIndex((task) => task._id === action.payload.task._id);
-                if (index !== -1) state.tasks[index].comments.push(action.payload.comment);
-                state.success = action.payload.message;
-                state.loading = false;
-            })
-            .addCase(addTaskComment.rejected, (state, action: PayloadAction<any>) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
-
             // Delete task
             .addCase(deleteTask.pending, (state) => {
                 state.loading = true;
@@ -302,6 +325,78 @@ const taskSlice = createSlice({
             .addCase(deleteTask.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+
+            // fetch all subtask comments
+            .addCase(fetchAllTaskComments.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchAllTaskComments.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedTask) {
+                    state.comments = action.payload.comments
+                } else {
+                    state.error = 'Task not set';
+                }
+                state.loading = false;
+            })
+            .addCase(fetchAllTaskComments.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Add comment to task
+            .addCase(addTaskComment.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(addTaskComment.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedTask) {
+                    state.comments.push(action.payload.comment)
+                    state.success = action.payload.message;
+                } else {
+                    state.error = 'Task not set';
+                }
+                state.loading = false;
+            })
+            .addCase(addTaskComment.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // edit task comment 
+            .addCase(editTaskComment.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(editTaskComment.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedTask) {
+                    const index = state.comments.findIndex((comment) => comment._id === action.payload.editedComment._id);
+                    if (index !== -1) state.comments[index] = action.payload.editedComment
+                    state.success = action.payload.message;
+                } else {
+                    state.error = 'Task not set';
+                }
+                state.loading = false;
+            })
+            .addCase(editTaskComment.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // delete task comment 
+            .addCase(deleteTaskComment.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(deleteTaskComment.fulfilled, (state, action: PayloadAction<any>) => {
+                if (state.selectedTask) {
+                    state.comments = state.comments.filter((comment) => comment._id !== action.payload.deletedCommentId)
+                    state.success = action.payload.message;
+                } else {
+                    state.error = 'Task not set';
+                }
+                state.loading = false;
+            })
+            .addCase(deleteTaskComment.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
             });
     },
 });
@@ -310,6 +405,8 @@ const taskSlice = createSlice({
 export const selectAllTasks = (state: RootState) => state.tasks.tasks;
 export const selectMyTasks = (state: RootState) => state.tasks.myTasks;
 export const selectAssignedTasks = (state: RootState) => state.tasks.assignedTasks;
+
+export const selectAllTaskComments = (state: RootState) => state.tasks.comments;
 
 // Actions and reducer export
 export const { resetMessages, setMyTasks, setAssignedTasks, setSelectedTask, resetSelectedTask, setError } = taskSlice.actions;

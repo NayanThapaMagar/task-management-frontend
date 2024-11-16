@@ -148,7 +148,7 @@ const AddSubtask: React.FC = () => {
                                 </Button>
 
                                 <Button
-                                    onClick={() => navigate('/tasks')}
+                                    onClick={() => navigate('/tasks/taskDetail')}
                                     sx={{
                                         px: 3,
                                         py: 1.5,

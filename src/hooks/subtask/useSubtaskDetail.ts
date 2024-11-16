@@ -3,7 +3,7 @@ import { marked } from "marked";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { updateSubtask, resetSelectedSubtask, setError, resetMessages } from "../../features/subtaskSlice";
+import { selectAllSubtaskComments, updateSubtask, resetSelectedSubtask, fetchAllSubtaskComments, setError, resetMessages } from "../../features/subtaskSlice";
 import { selectAllConnections, fetchUserConnections } from "../../features/userConnectionSlice";
 import { AppDispatch, RootState } from "../../store";
 import htmlToMarkdown from "@wcj/html-to-markdown";
@@ -16,6 +16,7 @@ const useSubtaskDetail = () => {
     const { loading, error, success, selectedSubtask } = useSelector((state: RootState) => state.subtasks);
 
     const allConnections = useSelector(selectAllConnections);
+    const allSubtaskComments = useSelector(selectAllSubtaskComments);
 
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [title, setTitle] = useState('');
@@ -30,10 +31,6 @@ const useSubtaskDetail = () => {
         priority: false,
         assignedTo: false,
     });
-
-    useEffect(() => {
-        dispatch(fetchUserConnections());
-    }, [dispatch]);
 
     const convertMarkDownToHtml = async (value: string) => {
         const htmlValue = await marked(value)
@@ -52,6 +49,14 @@ const useSubtaskDetail = () => {
         };
         setSubtaskDetail();
     }, [selectedSubtask]);
+
+    useEffect(() => {
+        dispatch(fetchUserConnections());
+        dispatch(fetchAllSubtaskComments({
+            taskId: selectedTask!._id,
+            subtaskId: selectedSubtask!._id,
+        }));
+    }, [dispatch]);
 
     const handleAssignedToChange = (event: SelectChangeEvent<string[]>) => {
         const {
@@ -116,6 +121,7 @@ const useSubtaskDetail = () => {
         priority,
         assignedTo,
         allConnections,
+        allSubtaskComments,
         setTitle,
         setDescription,
         setPriority,

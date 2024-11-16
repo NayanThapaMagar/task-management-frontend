@@ -18,6 +18,7 @@ const TaskDetail: React.FC = () => {
         priority,
         assignedTo,
         allConnections,
+        allSubtaskComments,
         setTitle,
         setDescription,
         setPriority,
@@ -217,12 +218,6 @@ const TaskDetail: React.FC = () => {
                         </Box>
                     </Box>
 
-                    <Typography variant="body1" fontWeight="bold" m={1}>Activity</Typography>
-
-                    <CommentBox taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
-
-                    {/* <CommentCard /> */}
-
                     <Divider sx={{ mt: 2, mb: 2 }} />
 
                     <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
@@ -263,6 +258,12 @@ const TaskDetail: React.FC = () => {
                             Close
                         </Button>
                     </Box>
+
+                    <Typography variant="body1" fontWeight="bold" m={1}>Activity</Typography>
+
+                    <CommentBox taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
+
+                    <CommentCard comments={allSubtaskComments} taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
 
                 </Box >
             )}

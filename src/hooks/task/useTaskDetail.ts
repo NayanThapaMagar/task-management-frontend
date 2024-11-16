@@ -3,7 +3,7 @@ import { marked } from "marked";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { updateTask, resetSelectedTask, setError, resetMessages as resetTaskMessages } from "../../features/taskSlice";
+import { selectAllTaskComments, updateTask, fetchAllTaskComments, resetSelectedTask, setError, resetMessages as resetTaskMessages } from "../../features/taskSlice";
 import { selectAllSubtasks, selectMySubtasks, selectAssignedSubtasks, fetchAllSubtasks, fetchMySubtasks, fetchAssignedSubtasks, updateSubtaskStatus, setSelectedSubtask, resetMessages as resetSubtaskMessages } from '../../features/subtaskSlice';
 import { selectAllConnections, fetchUserConnections } from "../../features/userConnectionSlice";
 import { AppDispatch, RootState } from "../../store";
@@ -33,6 +33,7 @@ const useTaskDetail = () => {
 
     // Task 
     const allConnections = useSelector(selectAllConnections);
+    const allTaskComments = useSelector(selectAllTaskComments);
 
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [title, setTitle] = useState('');
@@ -80,6 +81,7 @@ const useTaskDetail = () => {
 
     useEffect(() => {
         dispatch(fetchUserConnections());
+        dispatch(fetchAllTaskComments(selectedTask!._id));
     }, [dispatch]);
 
 
@@ -214,6 +216,7 @@ const useTaskDetail = () => {
         priority,
         assignedTo,
         allConnections,
+        allTaskComments,
         setTitle,
         setDescription,
         setPriority,

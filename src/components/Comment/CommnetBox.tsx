@@ -21,7 +21,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({ taskId, subtaskId }) => {
 
 
     return (
-        <Box sx={{ p: 2, mt: 2 }}>
+        <Box sx={{ p: 1, mt: 2, pb: 0 }}>
             <Box display={'flex'} flexDirection={'row'}>
                 <Box sx={{ display: 'flex', mb: 2 }}>
                     <Avatar sx={{ backgroundColor: 'darkcyan', width: 40, height: 40, mr: 2 }}>
@@ -38,10 +38,9 @@ const CommentBox: React.FC<CommentBoxProps> = ({ taskId, subtaskId }) => {
                         value={comment}
                         onChange={handleCommentChange}
                         onFocus={() => setIsTextFieldFocused(true)}
-                        onBlur={() => setIsTextFieldFocused(false)}
                         sx={{ mb: 2 }}
                     />
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    {isTextFieldFocused && <Box sx={{ display: 'flex', gap: 1 }}>
                         <Button
                             variant="contained"
                             color="primary"
@@ -59,7 +58,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({ taskId, subtaskId }) => {
                         >
                             Cancel
                         </Button>
-                    </Box>
+                    </Box>}
                 </Box>
             </Box>
         </Box>

@@ -3,6 +3,7 @@ import { AppDispatch, RootState } from '../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { addSubtaskComment } from '../../features/subtaskSlice';
 import { addTaskComment } from '../../features/taskSlice';
+import { getInitials } from '../../utils/index'
 
 const useCommentBox = () => {
 
@@ -30,11 +31,6 @@ const useCommentBox = () => {
     const handleCancel = () => {
         setIsTextFieldFocused(false)
         setComment('');
-    };
-
-    const getInitials = (name: string) => {
-        const names = name.split(' ');
-        return names.map((n) => n[0].toUpperCase()).join('');
     };
 
     return {
