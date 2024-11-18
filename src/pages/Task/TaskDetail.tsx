@@ -47,10 +47,6 @@ const TaskDetail: React.FC = () => {
 
     const navigate = useNavigate();
 
-    if (!selectedTask) {
-        navigate('/tasks');
-    }
-
     // Styles for the typing area (editor)
     const readModeReactQuillStyles = {
         "background-color": isDescriptionHovered ? '#f0f0f0' : 'white',

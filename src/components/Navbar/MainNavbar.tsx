@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     AppBar,
     Toolbar,
@@ -13,6 +13,7 @@ import {
     ListItemText,
     Drawer,
     Box,
+    Popover,
 } from '@mui/material';
 import {
     Notifications,
@@ -25,34 +26,25 @@ import {
     ChevronLeft,
     ChevronRight,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../store';
-import { logout } from '../features/authSlice';
+import NotificationBar from '../Notification/NotificationBar';
+import useMainNavbar from '../../hooks/navbar/useMainNavbar';
+
 
 const MainNavbar: React.FC = () => {
-    const dispatch: AppDispatch = useDispatch();
-    const navigate = useNavigate();
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [drawerOpen, setDrawerOpen] = useState(false);
 
-    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-    };
-
-    const handleLogout = () => {
-        dispatch(logout()).then(() => navigate('/login'));
-    };
-
-    // Function to handle navigation and close drawer
-    const handleNavigation = (path: string) => {
-        navigate(path);
-        setDrawerOpen(false); // Close the drawer on navigation
-    };
+    const {
+        anchorEl,
+        drawerOpen,
+        setDrawerOpen,
+        notificationAnchorEl,
+        toggleNotification,
+        handleNotificationBarClose,
+        handleAccountMenuOpen,
+        handleAccountMenuClose,
+        navigate,
+        handleNavigation,
+        handleLogout,
+    } = useMainNavbar()
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -69,18 +61,49 @@ const MainNavbar: React.FC = () => {
                     <Typography variant="h6" sx={{ flexGrow: 1 }}>
                         Task Manager
                     </Typography>
-                    <IconButton color="inherit">
-                        <Badge badgeContent={9} color="error">
-                            <Notifications />
-                        </Badge>
-                    </IconButton>
-                    <IconButton color="inherit" onClick={handleMenuOpen}>
+                    <Box>
+                        <IconButton
+                            color="inherit"
+                            onClick={toggleNotification}>
+                            <Badge badgeContent={9} color="error">
+                                <Notifications />
+                            </Badge>
+                        </IconButton>
+                        <Popover
+                            open={Boolean(notificationAnchorEl)}
+                            anchorEl={notificationAnchorEl}
+                            onClose={handleNotificationBarClose}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'center',
+                            }}
+                        // disablePortal={true} // Ensures the popover doesn't trap focus
+                        // disableEnforceFocus={true} // Prevents focus from being restricted within the popover
+                        // disableAutoFocus={true} // Allows other buttons to retain focus behavior
+                        >
+                            <NotificationBar maxWidth='350px' onClose={handleNotificationBarClose} />
+                        </Popover>
+                    </Box>
+                    <IconButton color="inherit" onClick={handleAccountMenuOpen} >
                         <AccountCircle />
                     </IconButton>
-                    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleAccountMenuClose}
+                    // disablePortal={true}
+                    // disableAutoFocus={true}
+                    // disableEnforceFocus={true}
+                    // disableRestoreFocus={true}
+                    >
                         <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
                     </Menu>
+
                 </Toolbar>
             </AppBar>
 
@@ -135,7 +158,7 @@ const MainNavbar: React.FC = () => {
                     top: '100px',
                     backgroundColor: 'grey.100',
                     color: 'black',
-                    width: 23, 
+                    width: 23,
                     height: 23,
                     zIndex: 1300,
                     '&:hover': {
@@ -146,7 +169,6 @@ const MainNavbar: React.FC = () => {
                 {drawerOpen ? <ChevronLeft /> : <ChevronRight />}
             </IconButton>
         </Box>
-
     );
 };
 

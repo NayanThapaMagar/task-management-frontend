@@ -5,6 +5,7 @@ import authReducer from '../features/authSlice';
 import userConnectionReducer from '../features/userConnectionSlice';
 import taskReducer from '../features/taskSlice';
 import subtaskReducer from '../features/subtaskSlice';
+import notificationReducer from '../features/notificationSlice';
 
 // Define the persist configuration
 const authPersistConfig = {
@@ -34,6 +35,7 @@ export const store = configureStore({
         userConnection: userConnectionReducer,
         tasks: persistedTaskReducer,
         subtasks: persistedsubTaskReducer,
+        notifications: notificationReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

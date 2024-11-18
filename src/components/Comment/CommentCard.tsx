@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Avatar, Button, TextField } from '@mui/material';
-import { Comment } from '../../types';
-import { timeAgo, getInitials } from '../../utils';
+import { Comment, User } from '../../types';
+import { getInitials } from '../../utils';
 import useCommentCard from '../../hooks/comment/useCommentCard';
 
 interface CommentCardProps {
@@ -33,7 +33,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ comments, taskId, subtaskId }
           <Box display={'flex'} flexDirection={'row'}>
             <Box sx={{ display: 'flex', mb: 2 }}>
               <Avatar sx={{ backgroundColor: 'darkcyan', width: 40, height: 40, mr: 2 }}>
-                {getInitials(comment.userId.username)}
+                {getInitials((comment.userId as User).username)}
               </Avatar>
             </Box>
             <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -44,7 +44,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ comments, taskId, subtaskId }
                     fontWeight: 540,
                     fontSize: "1.1rem",
                   }}
-                  >{comment.userId.username.toLocaleUpperCase()}</Typography>
+                  >{(comment.userId as User).username.toLocaleUpperCase()}</Typography>
                   <Button
                     onClick={toggleTimestampFormat}
                     disableRipple

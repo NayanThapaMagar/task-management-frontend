@@ -67,6 +67,12 @@ const useTaskDetail = () => {
     }
 
     useEffect(() => {
+        if (!selectedTask) {
+            navigate('/tasks');
+        }
+    }, []);
+
+    useEffect(() => {
         const setTaskDetail = async () => {
             if (selectedTask) {
                 const htmlDescription = await convertMarkDownToHtml(selectedTask.description);
@@ -81,28 +87,32 @@ const useTaskDetail = () => {
 
     useEffect(() => {
         dispatch(fetchUserConnections());
-        dispatch(fetchAllTaskComments(selectedTask!._id));
+        if (selectedTask) {
+            dispatch(fetchAllTaskComments(selectedTask._id));
+        }
     }, [dispatch]);
 
 
     // Subtasks
 
     const fetchSubtasks = async () => {
-        const query: Record<string, string> = {};
-        if (subtaskPriorityFilter !== 'all') query.priority = subtaskPriorityFilter;
+        if (selectedTask) {
+            const query: Record<string, string> = {};
+            if (subtaskPriorityFilter !== 'all') query.priority = subtaskPriorityFilter;
 
-        if (subtaskCategory === 'all') {
-            await dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
-        } else if (subtaskCategory === 'myTasks') {
-            await dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
-        } else if (subtaskCategory === 'assignedTasks') {
-            await dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
+            if (subtaskCategory === 'all') {
+                await dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
+            } else if (subtaskCategory === 'myTasks') {
+                await dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
+            } else if (subtaskCategory === 'assignedTasks') {
+                await dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
+            }
         }
     };
 
     useEffect(() => {
         fetchSubtasks();
-    }, [subtaskPriorityFilter, subtaskCategory, dispatch]);
+    }, [subtaskPriorityFilter, subtaskCategory, selectedTask, dispatch]);
 
     useEffect(() => {
         const subtasks = subtaskCategory === 'all' ? allSubtasks : subtaskCategory === 'myTasks' ? mySubtasks : assignedSubtasks;

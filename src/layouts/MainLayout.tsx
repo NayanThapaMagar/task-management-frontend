@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import Navbar from '../components/MainNavbar';
+import Navbar from '../components/Navbar/MainNavbar';
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
 

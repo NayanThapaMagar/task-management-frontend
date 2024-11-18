@@ -4,12 +4,15 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
+import Notification from './pages/Notifications';
+
 import Task from './pages/Task/TaskList';
 import AddTask from './pages/Task/AddTask';
 import TaskDetail from './pages/Task/TaskDetail';
-import AddSubtask from './pages/Task/AddSubtask';
-import SubtaskDetail from './pages/Task/SubtaskDetail';
+import AddSubtask from './pages/Subtask/AddSubtask';
+import SubtaskDetail from './pages/Subtask/SubtaskDetail';
 import UserConnection from './pages/userConnection';
+
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import PublicLayout from './layouts/PublicLayout';
@@ -28,6 +31,8 @@ const App: React.FC = () => {
                     <Route path="/tasks/subtaskDetail" element={<SubtaskDetail />} />
     
                     <Route path="/userConnection" element={<UserConnection />} />
+
+                    <Route path="/notifications" element={<Notification />} />
                 </Route>
 
                 <Route element={<AuthLayout />}>

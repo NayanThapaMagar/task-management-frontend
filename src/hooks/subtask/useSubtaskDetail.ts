@@ -38,6 +38,11 @@ const useSubtaskDetail = () => {
     }
 
     useEffect(() => {
+        if (!selectedSubtask) {
+            navigate('/tasks/taskDetail');
+        }
+    }, [])
+    useEffect(() => {
         const setSubtaskDetail = async () => {
             if (selectedSubtask) {
                 const htmlDescription = await convertMarkDownToHtml(selectedSubtask.description);
@@ -52,10 +57,12 @@ const useSubtaskDetail = () => {
 
     useEffect(() => {
         dispatch(fetchUserConnections());
-        dispatch(fetchAllSubtaskComments({
-            taskId: selectedTask!._id,
-            subtaskId: selectedSubtask!._id,
-        }));
+        if (selectedTask && selectedSubtask) {
+            dispatch(fetchAllSubtaskComments({
+                taskId: selectedTask._id,
+                subtaskId: selectedSubtask._id,
+            }));
+        }
     }, [dispatch]);
 
     const handleAssignedToChange = (event: SelectChangeEvent<string[]>) => {

@@ -4,14 +4,6 @@ export interface User {
   email: string;
 }
 
-export interface Comment {
-  _id: string;
-  userId: User;
-  text: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface TaskCreate {
   title: string;
   description: string;
@@ -38,3 +30,21 @@ export interface SubTask extends TaskCreate {
   updatedAt: Date;
 }
 
+export interface Comment {
+  _id: string;
+  userId: User | string;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Notification {
+  _id: string;
+  originatorId: User;
+  recipientId: User;
+  message: string;
+  taskId?: Task | string;
+  subtaskId?: SubTask | string;
+  isRead: boolean;
+  createdAt: Date;
+}
