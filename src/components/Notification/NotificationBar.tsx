@@ -4,18 +4,19 @@ import { MoreHoriz } from '@mui/icons-material';
 import NotificationsIcon from '@mui/icons-material/NotificationsNone';
 import NotificationCard from './NotificationCard';
 import useNotificationBar from '../../hooks/notification/useNotificationBar';
-import { MinWidth, MaxWidth, Border, BackgroundColor } from '../../types/props'
+import { MinWidth, MaxWidth } from '../../types/props'
+import { Notification } from '../../types';
 
 interface NotificationBarProps {
+    notifications: Notification[];
     onClose: () => void;
+    pageMode?: boolean | undefined;
     minWidth?: MinWidth;
     maxWidth?: MaxWidth;
-    border?: Border;
-    backgroundColor?: BackgroundColor;
 }
 
 // Notification Bar Component
-const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, minWidth, maxWidth, border, backgroundColor }) => {
+const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClose, pageMode, minWidth, maxWidth }) => {
     const {
         anchorEl,
         showUnread,
@@ -29,7 +30,7 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, minWidth, ma
         toggleMenu,
         handleMenuClose,
         navigate,
-    } = useNotificationBar(onClose)
+    } = useNotificationBar(notifications, onClose)
 
     const theme = useTheme();
 
@@ -41,8 +42,6 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, minWidth, ma
                 paddingBottom: '12px',
                 minWidth,
                 maxWidth,
-                border,
-                backgroundColor,
             }}
         >
             <Box ml={2} mr={2} mt={3} mb={1}>
@@ -65,9 +64,9 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, minWidth, ma
                     </IconButton>
                     <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                         <MenuItem onClick={markAllAsRead}>Mark All as Read</MenuItem>
-                        <MenuItem onClick={() => { handleMenuClose(); navigate('/notifications') }}>
+                        {!pageMode && <MenuItem onClick={() => { handleMenuClose(); onClose(); navigate('/notifications') }}>
                             Open Notifications
-                        </MenuItem>
+                        </MenuItem>}
                     </Menu>
                 </Box>
             </Box>
@@ -114,15 +113,16 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, minWidth, ma
 
 
 
-            <List sx={{ padding: 0, overflowY: 'auto' }}>
+            <List sx={{ padding: 0, overflowY: 'hidden', minWidth: '100%', display: 'flex', justifyContent: 'center' }}>
                 {filteredNotifications.length === 0 ? (
                     <Card
                         sx={{
+                            display: 'flex',
+                            alignItems: 'center',
                             maxWidth: 400,
                             padding: 3,
                             textAlign: 'center',
-                            boxShadow: 2,
-                            borderRadius: 2,
+                            boxShadow: 'none'
                         }}
                     >
                         <CardContent>
@@ -150,7 +150,7 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, minWidth, ma
                         </CardContent>
                     </Card>
                 ) : (
-                    <Box>
+                    <Box width={'100%'}>
                         {filteredNotifications.map((notification) => (
                             <NotificationCard
                                 key={notification._id}

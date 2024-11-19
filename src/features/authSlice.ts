@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../api/axios';
+import { destroySocket } from '../socktes/socket';
 
 const BASE_URL = '/auth';
 
@@ -56,7 +57,8 @@ export const login = createAsyncThunk(
 // Logout User
 export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
     try {
-        localStorage.removeItem('token'); 
+        localStorage.removeItem('token');
+        destroySocket();
         return;
     } catch (error: any) {
         return thunkAPI.rejectWithValue('Logout failed');

@@ -151,7 +151,7 @@ const useTaskDetail = () => {
             await dispatch(updateTask(updatedTask)).unwrap();
             setEditMode({ title: false, description: false, priority: false, assignedTo: false });
         } catch (error: any) {
-            console.error(error);
+            // console.error(error);
         }
     };
 

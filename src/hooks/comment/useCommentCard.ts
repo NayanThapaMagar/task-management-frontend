@@ -41,7 +41,7 @@ const useCommentCard = () => {
                     setEditModeId(null)
                 }
             } catch (error) {
-                console.error("Error submitting comment:", error)
+                // console.error("Error submitting comment:", error)
             }
         }
     };

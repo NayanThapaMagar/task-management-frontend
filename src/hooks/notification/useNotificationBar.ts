@@ -1,28 +1,18 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { Notification, SubTask, Task } from "../../types";
-import { fetchAllNotifications, markAllNotificationsAsRead, markNotificationAsRead, markNotificationAsUnread, deleteNotification, selectAllNotifications } from "../../features/notificationSlice";
+import { markAllNotificationsAsRead, markNotificationAsRead, markNotificationAsUnread, deleteNotification } from "../../features/notificationSlice";
 import { setSelectedTask } from "../../features/taskSlice";
 import { setSelectedSubtask } from "../../features/subtaskSlice";
 import { useNavigate } from "react-router-dom";
 
-const useNotificationBar = (closeNotificationBar: () => void) => {
+const useNotificationBar = (notifications: Notification[], closeNotificationBar: () => void) => {
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
-    const notifications = useSelector(selectAllNotifications)
 
-    // const [notifications, setNotifications] = useState(allNotifications);
     const [showUnread, setShowUnread] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-    const fetchNotifications = async () => {
-        await dispatch(fetchAllNotifications({ page: 1, limit: 10 }))
-    }
-
-    useEffect(() => {
-        fetchNotifications()
-    }, [dispatch]);
 
     const filteredNotifications = showUnread
         ? notifications.filter((notification) => !notification.isRead)

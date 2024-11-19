@@ -78,6 +78,19 @@ export const markAllNotificationsAsRead = createAsyncThunk(
     }
 );
 
+// Mark all notifications as read
+export const markAllNotificationsAsSeen = createAsyncThunk(
+    'notifications/markAllAsSeen',
+    async (params: { page: number; limit: number }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.put(`${BASE_URL}/markAllSeen`, { params });
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error marking all notifications as seen');
+        }
+    }
+);
+
 // Delete notification
 export const deleteNotification = createAsyncThunk(
     'notifications/delete',
@@ -99,6 +112,9 @@ const notificationSlice = createSlice({
         resetMessages(state) {
             state.error = null;
             state.success = null;
+        },
+        addNewNotification: (state, action: PayloadAction<Notification>) => {
+            state.notifications.unshift(action.payload);
         },
     },
     extraReducers: (builder) => {
@@ -162,6 +178,20 @@ const notificationSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // Mark all notifications as seen
+            .addCase(markAllNotificationsAsSeen.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(markAllNotificationsAsSeen.fulfilled, (state, action: PayloadAction<any>) => {
+                state.notifications = action.payload.updatedNotifications;
+                // state.success = action.payload.message;
+                state.loading = false;
+            })
+            .addCase(markAllNotificationsAsSeen.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
             // Delete notification
             .addCase(deleteNotification.pending, (state) => {
                 state.loading = true;
@@ -180,7 +210,7 @@ const notificationSlice = createSlice({
     },
 });
 
-export const { resetMessages } = notificationSlice.actions;
+export const { addNewNotification, resetMessages } = notificationSlice.actions;
 
 export const selectAllNotifications = (state: RootState) => state.notifications.notifications;
 

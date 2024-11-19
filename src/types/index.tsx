@@ -46,5 +46,6 @@ export interface Notification {
   taskId?: Task | string;
   subtaskId?: SubTask | string;
   isRead: boolean;
+  isSeen: boolean;
   createdAt: Date;
 }

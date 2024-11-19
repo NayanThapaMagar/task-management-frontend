@@ -28,15 +28,22 @@ import {
 } from '@mui/icons-material';
 import NotificationBar from '../Notification/NotificationBar';
 import useMainNavbar from '../../hooks/navbar/useMainNavbar';
+import { useAppState } from '../../context/AppStateContext';
 
 
 const MainNavbar: React.FC = () => {
+
+    const {
+        isNotificationsPageMode
+    } = useAppState();
 
     const {
         anchorEl,
         drawerOpen,
         setDrawerOpen,
         notificationAnchorEl,
+        unSeenNotificationsCount,
+        allNotifications,
         toggleNotification,
         handleNotificationBarClose,
         handleAccountMenuOpen,
@@ -46,6 +53,7 @@ const MainNavbar: React.FC = () => {
         handleLogout,
     } = useMainNavbar()
 
+
     return (
         <Box sx={{ display: 'flex' }}>
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -54,7 +62,12 @@ const MainNavbar: React.FC = () => {
                         color="inherit"
                         edge="start"
                         onClick={() => setDrawerOpen(!drawerOpen)}
-                        sx={{ mr: 2 }}
+                        sx={{
+                            mr: 2,
+                            '&:hover': {
+                                backgroundColor: 'primary.dark',
+                            },
+                        }}
                     >
                         <MenuIcon />
                     </IconButton>
@@ -63,9 +76,19 @@ const MainNavbar: React.FC = () => {
                     </Typography>
                     <Box>
                         <IconButton
+                            disabled={isNotificationsPageMode}
                             color="inherit"
-                            onClick={toggleNotification}>
-                            <Badge badgeContent={9} color="error">
+                            onClick={toggleNotification}
+                            sx={{
+                                '&.Mui-disabled': {
+                                    color: 'grey.400',
+                                    backgroundColor: 'primary.light',
+                                },
+                                '&:hover': {
+                                    backgroundColor: isNotificationsPageMode ? 'primary.light' : 'primary.dark',
+                                },
+                            }}>
+                            <Badge badgeContent={unSeenNotificationsCount} color="error">
                                 <Notifications />
                             </Badge>
                         </IconButton>
@@ -85,10 +108,14 @@ const MainNavbar: React.FC = () => {
                         // disableEnforceFocus={true} // Prevents focus from being restricted within the popover
                         // disableAutoFocus={true} // Allows other buttons to retain focus behavior
                         >
-                            <NotificationBar maxWidth='350px' onClose={handleNotificationBarClose} />
+                            <NotificationBar notifications={allNotifications} maxWidth='350px' onClose={handleNotificationBarClose} />
                         </Popover>
                     </Box>
-                    <IconButton color="inherit" onClick={handleAccountMenuOpen} >
+                    <IconButton color="inherit" onClick={handleAccountMenuOpen} sx={{
+                        '&:hover': {
+                            backgroundColor: 'primary.dark',
+                        },
+                    }} >
                         <AccountCircle />
                     </IconButton>
                     <Menu
