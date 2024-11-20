@@ -3,7 +3,7 @@ import { SelectChangeEvent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Task as TaskType } from '../../types';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAllTasks, selectMyTasks, selectAssignedTasks, fetchAllTasks, fetchMyTasks, fetchAssignedTasks, updateTaskStatus, setSelectedTask, resetMessages } from '../../features/taskSlice';
+import { selectAllTasks, selectMyTasks, selectAssignedTasks, fetchAllTasks, fetchMyTasks, fetchAssignedTasks, updateTaskStatus, resetTasks, setSelectedTask, resetMessages } from '../../features/taskSlice';
 import { AppDispatch, RootState } from '../../store';
 
 const useTaskList = () => {
@@ -16,29 +16,38 @@ const useTaskList = () => {
     const assignedTasks = useSelector(selectAssignedTasks);
 
     const [openSnackbar, setOpenSnackbar] = useState(false);
+
     const [search, setSearch] = useState('');
     const [taskPriorityFilter, setTaskPriorityFilter] = useState('all');
     const [taskCategory, setTaskCategory] = useState('all');
 
+    const [page, setPage] = useState(1);
+
     const [listTasks, setListTasks] = useState<TaskType[]>([]);
 
     const [draggedTask, setDraggedTask] = useState<{ task: TaskType; currentStatus: string } | null>(null);
+
 
     const fetchTasks = async () => {
         const query: Record<string, string> = {};
         if (taskPriorityFilter !== 'all') query.priority = taskPriorityFilter;
 
         if (taskCategory === 'all') {
-            await dispatch(fetchAllTasks({ ...query, page: 1, limit: 10 }));
+            await dispatch(fetchAllTasks({ ...query, page, limit: 20 }));
         } else if (taskCategory === 'myTasks') {
-            await dispatch(fetchMyTasks({ ...query, page: 1, limit: 10 }));
+            await dispatch(fetchMyTasks({ ...query, page, limit: 20 }));
         } else if (taskCategory === 'assignedTasks') {
-            await dispatch(fetchAssignedTasks({ ...query, page: 1, limit: 10 }));
+            await dispatch(fetchAssignedTasks({ ...query, page, limit: 20 }));
         }
     };
+    const fetchMoreTasks = async () => {
+        setPage((prev) => prev + 1);
+        await fetchTasks();
+    }
 
     useEffect(() => {
         fetchTasks();
+        return () => { dispatch(resetTasks()) }
     }, [taskPriorityFilter, taskCategory, dispatch]);
 
     useEffect(() => {
@@ -82,6 +91,14 @@ const useTaskList = () => {
         setDraggedTask(null);
     };
 
+    const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+        const scrollContainer = e.currentTarget;
+
+        if (!loading && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
+            fetchMoreTasks();
+        }
+    };
+
     useEffect(() => {
         if (error || success) {
             setOpenSnackbar(true);
@@ -111,6 +128,7 @@ const useTaskList = () => {
         handleDragTaskStart,
         handleDragTaskOver,
         handleDropTask,
+        handleScroll,
         loading,
         success,
         error,

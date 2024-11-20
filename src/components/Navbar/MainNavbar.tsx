@@ -48,6 +48,7 @@ const MainNavbar: React.FC = () => {
         handleNotificationBarClose,
         handleAccountMenuOpen,
         handleAccountMenuClose,
+        handleScroll,
         navigate,
         handleNavigation,
         handleLogout,
@@ -96,6 +97,7 @@ const MainNavbar: React.FC = () => {
                             open={Boolean(notificationAnchorEl)}
                             anchorEl={notificationAnchorEl}
                             onClose={handleNotificationBarClose}
+                            onScroll={handleScroll}
                             anchorOrigin={{
                                 vertical: 'bottom',
                                 horizontal: 'center',
@@ -104,6 +106,10 @@ const MainNavbar: React.FC = () => {
                                 vertical: 'top',
                                 horizontal: 'center',
                             }}
+                            // sx={{
+                            //     padding: '20px',
+                            //     color: 'red'
+                            // }}
                         // disablePortal={true} // Ensures the popover doesn't trap focus
                         // disableEnforceFocus={true} // Prevents focus from being restricted within the popover
                         // disableAutoFocus={true} // Allows other buttons to retain focus behavior
@@ -180,7 +186,7 @@ const MainNavbar: React.FC = () => {
                 onClick={() => setDrawerOpen(!drawerOpen)}
                 sx={{
                     position: 'fixed',
-                    left: drawerOpen ? 228 : 44,
+                    left: drawerOpen ? 227 : 46,
                     transition: 'left 0.3s',
                     top: '100px',
                     backgroundColor: 'grey.100',

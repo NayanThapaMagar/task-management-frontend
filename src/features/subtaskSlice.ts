@@ -206,7 +206,8 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchAllSubtasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.subtasks = action.payload.subtasks;
+                state.subtasks = [...state.subtasks, ...action.payload.subtasks];
+                // state.subtasks = action.payload.subtasks;
             })
             .addCase(fetchAllSubtasks.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -219,7 +220,8 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchMySubtasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.mySubtasks = action.payload.subtasks;
+                state.mySubtasks = [...state.mySubtasks, ...action.payload.subtasks];
+                // state.mySubtasks = action.payload.subtasks;
             })
             .addCase(fetchMySubtasks.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -232,7 +234,8 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchAssignedSubtasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.assignedSubtasks = action.payload.subtasks;
+                state.assignedSubtasks = [...state.assignedSubtasks, ...action.payload.subtasks];
+                // state.assignedSubtasks = action.payload.subtasks;
             })
             .addCase(fetchAssignedSubtasks.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -258,7 +261,8 @@ const subtaskSlice = createSlice({
             })
             .addCase(createSubtask.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.subtasks.push(action.payload.subtask);
+                state.subtasks = [action.payload.subtask, ...state.subtasks];
+                // state.subtasks.push(action.payload.subtask);
                 state.success = action.payload.message;
             })
             .addCase(createSubtask.rejected, (state, action: PayloadAction<any>) => {
@@ -271,6 +275,8 @@ const subtaskSlice = createSlice({
                 state.loading = true;
             })
             .addCase(updateSubtask.fulfilled, (state, action: PayloadAction<any>) => {
+                const index = state.subtasks.findIndex((subtask) => subtask._id === action.payload.updatedSubtask._id);
+                if (index !== -1) state.subtasks[index] = action.payload.updatedSubtask;
                 state.selectedSubtask = action.payload.updatedSubtask;
                 state.success = action.payload.message;
                 state.loading = false;
@@ -317,7 +323,8 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchAllSubtaskComments.fulfilled, (state, action: PayloadAction<any>) => {
                 if (state.selectedSubtask) {
-                    state.comments = action.payload.comments
+                    state.comments = [...state.comments, ...action.payload.comments];
+                    // state.comments = action.payload.comments
                 } else {
                     state.error = 'Subtask not set';
                 }
@@ -334,7 +341,8 @@ const subtaskSlice = createSlice({
             })
             .addCase(addSubtaskComment.fulfilled, (state, action: PayloadAction<any>) => {
                 if (state.selectedSubtask) {
-                    state.comments.push(action.payload.comment)
+                    state.comments = [action.payload.comment, ...state.comments];
+                    // state.comments.push(action.payload.comment)
                     state.success = action.payload.message;
                 } else {
                     state.error = 'Subtask not set';

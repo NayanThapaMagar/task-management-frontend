@@ -114,7 +114,7 @@ const notificationSlice = createSlice({
             state.success = null;
         },
         addNewNotification: (state, action: PayloadAction<Notification>) => {
-            state.notifications.unshift(action.payload);
+            state.notifications = [action.payload, ...state.notifications];
         },
     },
     extraReducers: (builder) => {
@@ -125,7 +125,8 @@ const notificationSlice = createSlice({
             })
             .addCase(fetchAllNotifications.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.notifications = action.payload.notifications;
+                state.notifications = [...state.notifications, ...action.payload.notifications];
+                // state.notifications = action.payload.notifications;
                 state.totalNotifications = action.payload.totalNotifications;
                 state.totalPages = action.payload.totalPages;
             })

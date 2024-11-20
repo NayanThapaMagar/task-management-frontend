@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store";
 import { Notification, SubTask, Task } from "../../types";
-import { markAllNotificationsAsRead, markNotificationAsRead, markNotificationAsUnread, deleteNotification } from "../../features/notificationSlice";
+import { fetchAllNotifications, markAllNotificationsAsRead, markNotificationAsRead, markNotificationAsUnread, deleteNotification } from "../../features/notificationSlice";
 import { setSelectedTask } from "../../features/taskSlice";
 import { setSelectedSubtask } from "../../features/subtaskSlice";
 import { useNavigate } from "react-router-dom";
@@ -11,8 +11,11 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
 
+    // const { loading, error, success } = useSelector((state: RootState) => state.notifications);
+
     const [showUnread, setShowUnread] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
 
     const filteredNotifications = showUnread
         ? notifications.filter((notification) => !notification.isRead)
@@ -26,7 +29,7 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
     };
     const markAllAsRead = async () => {
         handleMenuClose()
-        await dispatch(markAllNotificationsAsRead({ page: 1, limit: 10 }))
+        await dispatch(markAllNotificationsAsRead({ page: 1, limit: 20 }))
     };
     const handleDeleteNotification = async (notificationId: string) => {
         await dispatch(deleteNotification(notificationId))
@@ -43,8 +46,6 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
             navigate('/tasks/subtaskDetail');
         }
     };
-
-
 
     const toggleMenu = (e: React.MouseEvent<HTMLElement>) => {
         if (Boolean(anchorEl)) {

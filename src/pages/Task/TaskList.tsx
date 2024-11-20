@@ -34,6 +34,7 @@ const Task: React.FC = () => {
         handleDragTaskStart,
         handleDragTaskOver,
         handleDropTask,
+        handleScroll,
         loading,
         success,
         error,
@@ -88,42 +89,80 @@ const Task: React.FC = () => {
                     <CircularProgress />
                 ) : (
                     <Box
-                        gap={1}
                         sx={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            overflowX: 'auto',
-                            flexWrap: 'nowrap',
+                            maxHeight: '30vh',
+                            overflowY: 'auto',
+                            paddingRight: '16px',
                         }}
+                        onScroll={handleScroll}
                     >
-                        {Object.entries(groupedTasks).map(([status, tasks]) => (
-                            <Box
-                                key={status}
-                                onDragOver={handleDragTaskOver}
-                                onDrop={(e) => handleDropTask(e, status)}
-                                sx={{
-                                    padding: 1,
-                                    margin: 1,
-                                    border: '1px solid #ccc',
-                                    borderRadius: '8px',
-                                    boxShadow: 2,
-                                    backgroundColor: 'background.paper',
-                                    minWidth: '150px',
-                                    minHeight: '150px',
-                                    flexGrow: 1,
-                                    flexBasis: 0,
-                                    '&:hover': {
-                                        borderColor: 'currentcolor', 
-                                    },
-                                }}
-                            >
-                                <Box mb={2}>
-                                    <h3>{status}</h3>
-                                    <TaskCard tasks={tasks} onTaskClick={handleTaskClick} draggedTaskStatus={status} onTaskDragStart={handleDragTaskStart} />
+                        <Box
+                            gap={0.3}
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                flexWrap: 'nowrap',
+                            }}
+                        >
+                            {Object.entries(groupedTasks).map(([status, tasks]) => (
+                                <Box
+                                    key={status}
+                                    onDragOver={handleDragTaskOver}
+                                    onDrop={(e) => handleDropTask(e, status)}
+                                    sx={{
+                                        padding: 0.5,
+                                        margin: 0,
+                                        paddingBottom: 0,
+                                        paddingTop: 0,
+                                        backgroundColor: 'grey.100',
+                                        minWidth: '150px',
+                                        flexGrow: 1,
+                                        flexBasis: 0,
+                                        '&:hover': {
+                                            borderColor: 'currentcolor',
+                                        },
+                                    }}
+                                >
+                                    <Box sx={{
+                                        height: '100%',
+                                    }}>
+                                        <Box
+                                            className="status-header"
+                                            sx={{
+                                                marginBottom: '4px',
+                                                padding: '6px',
+                                                textAlign: 'center',
+                                                position: 'sticky',
+                                                top: 0,
+                                                zIndex: 1,
+                                                backgroundColor: 'grey.100',
+                                                transition: 'box-shadow 0.3s ease',
+                                            }}
+                                        >
+                                            <h3
+                                                style={{
+                                                    margin: 0,
+                                                    fontWeight: '500',
+                                                    fontSize: '1rem',
+                                                }}
+                                            >
+                                                {status.toLocaleUpperCase()}
+                                            </h3>
+                                        </Box>
+                                        <Box>
+                                            <TaskCard
+                                                tasks={tasks}
+                                                onTaskClick={handleTaskClick}
+                                                draggedTaskStatus={status}
+                                                onTaskDragStart={handleDragTaskStart}
+                                            />
+                                        </Box>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        ))}
+                            ))}
+                        </Box>
                     </Box>
+
                 )}
 
                 <br />

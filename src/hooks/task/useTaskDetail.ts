@@ -101,11 +101,11 @@ const useTaskDetail = () => {
             if (subtaskPriorityFilter !== 'all') query.priority = subtaskPriorityFilter;
 
             if (subtaskCategory === 'all') {
-                await dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
+                await dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 20 } }));
             } else if (subtaskCategory === 'myTasks') {
-                await dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
+                await dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 20 } }));
             } else if (subtaskCategory === 'assignedTasks') {
-                await dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 10 } }));
+                await dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 20 } }));
             }
         }
     };

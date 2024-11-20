@@ -30,30 +30,23 @@ const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStat
           key={task._id}
           draggable
           onDragStart={(e) => onTaskDragStart(e, task, draggedTaskStatus)}
-          border={1}
-          borderColor="grey.300"
-          borderRadius={2}
-          padding={2}
-          marginBottom={2}
           onClick={() => onTaskClick(task)}
           sx={{
             cursor: 'pointer',
-            padding: 2,
-            marginBottom: 2,
+            padding: 1,
+            marginBottom: 0.3,
             border: '1px solid #ccc',
-            borderRadius: '8px',
-            boxShadow: 1,
             backgroundColor: 'background.paper',
             transition: 'transform 0.1s, opacity 0.1s',
             '&:hover': {
-               backgroundColor: 'grey.100',
-                boxShadow: 3, 
-                transform: 'scale(1.02)', 
+              backgroundColor: 'grey.100',
+              boxShadow: 3,
+              transform: 'scale(1.02)',
             },
             '&:active': {
-                cursor: 'grabbing', 
-                opacity: 0.9, 
-                boxShadow: 5, 
+              cursor: 'grabbing',
+              opacity: 0.9,
+              boxShadow: 5,
             },
           }}
           aria-label={`Task titled ${task.title} with priority ${task.priority}`}
@@ -63,7 +56,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStat
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <Typography variant="h6">{task.title}</Typography>
+            <Typography sx={{
+              flexGrow: 1,
+              fontWeight: '500',
+              fontSize: '1rem',
+            }}>{task.title}</Typography>
             <IconButton
               aria-label="more"
               aria-controls="long-menu"
@@ -85,7 +82,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStat
               <MenuItem onClick={handleDeleteTask}>Delete</MenuItem>
             </Menu>
           </Box>
-          <Typography variant="body1">
+          <Typography sx={{
+            fontWeight: '500',
+            fontSize: '0.8rem',
+          }}>
             Priority:
             <span
               style={{

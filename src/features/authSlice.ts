@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../api/axios';
-import { destroySocket } from '../socktes/socket';
+import { initializeSocket, destroySocket } from '../socktes/socket';
 
 const BASE_URL = '/auth';
 
@@ -28,6 +28,7 @@ export const register = createAsyncThunk(
 
             // Save token to localStorage
             localStorage.setItem('token', token);
+            initializeSocket(token);
 
             return { token, user };
         } catch (error: any) {
@@ -46,6 +47,7 @@ export const login = createAsyncThunk(
 
             // Save token to localStorage
             localStorage.setItem('token', token);
+            initializeSocket(token);
 
             return { token, user };
         } catch (error: any) {

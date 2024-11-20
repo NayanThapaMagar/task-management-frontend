@@ -113,7 +113,14 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
 
 
 
-            <List sx={{ padding: 0, overflowY: 'hidden', minWidth: '100%', display: 'flex', justifyContent: 'center' }}>
+            <List sx={{
+                padding: 0,
+                // overflowY: 'hidden',
+                minWidth: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+            }}
+            >
                 {filteredNotifications.length === 0 ? (
                     <Card
                         sx={{

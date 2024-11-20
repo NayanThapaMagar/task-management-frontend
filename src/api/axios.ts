@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { initializeSocket } from '../socktes/socket';
 
 // Set environment-specific base URL
 const BASE_URL = `${process.env.REACT_APP_API_BASE_URL}`
@@ -18,7 +17,6 @@ axiosInstance.interceptors.request.use(
         const token = localStorage.getItem('token'); // Retrieve token from local storage
         if (token) {
             config.headers.Authorization = `Bearer ${token}`; // Attach JWT token in Authorization header
-            initializeSocket(token);
         }
         return config;
     },

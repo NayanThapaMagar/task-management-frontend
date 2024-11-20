@@ -192,8 +192,8 @@ const taskSlice = createSlice({
         setError(state, action: PayloadAction<string>) {
             state.error = action.payload;
         },
-        setMyTasks: (state, action: PayloadAction<Task[]>) => {
-            state.myTasks = action.payload;
+        resetTasks: (state) => {
+            state.tasks = [];
         },
         setAssignedTasks: (state, action: PayloadAction<Task[]>) => {
             state.assignedTasks = action.payload;
@@ -213,7 +213,8 @@ const taskSlice = createSlice({
             })
             .addCase(fetchAllTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.tasks = action.payload.tasks;
+                state.tasks = [...state.tasks, ...action.payload.tasks];
+                // state.tasks = action.payload.tasks;
                 // state.totalTasks = action.payload.totalTasks;
                 // state.totalPages = action.payload.totalPages;
             })
@@ -228,7 +229,8 @@ const taskSlice = createSlice({
             })
             .addCase(fetchMyTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.myTasks = action.payload.tasks;
+                state.myTasks = [...state.myTasks, ...action.payload.tasks];
+                // state.myTasks = action.payload.tasks;
                 // state.totalTasks = action.payload.totalTasks;
                 // state.totalPages = action.payload.totalPages;
             })
@@ -243,7 +245,8 @@ const taskSlice = createSlice({
             })
             .addCase(fetchAssignedTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.assignedTasks = action.payload.tasks;
+                state.assignedTasks = [...state.assignedTasks, ...action.payload.tasks];
+                // state.assignedTasks = action.payload.tasks;
                 // state.totalTasks = action.payload.totalTasks;
                 // state.totalPages = action.payload.totalPages;
             })
@@ -272,7 +275,8 @@ const taskSlice = createSlice({
             })
             .addCase(createTask.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.tasks.push(action.payload.task);
+                // state.tasks = [action.payload.task, ...state.tasks];
+                // state.tasks.push(action.payload.task);
                 state.success = action.payload.message;
             })
             .addCase(createTask.rejected, (state, action: PayloadAction<any>) => {
@@ -333,7 +337,8 @@ const taskSlice = createSlice({
             })
             .addCase(fetchAllTaskComments.fulfilled, (state, action: PayloadAction<any>) => {
                 if (state.selectedTask) {
-                    state.comments = action.payload.comments
+                    state.comments = [...state.comments, ...action.payload.comments];
+                    // state.comments = action.payload.comments
                 } else {
                     state.error = 'Task not set';
                 }
@@ -350,7 +355,8 @@ const taskSlice = createSlice({
             })
             .addCase(addTaskComment.fulfilled, (state, action: PayloadAction<any>) => {
                 if (state.selectedTask) {
-                    state.comments.push(action.payload.comment)
+                    state.comments = [action.payload.comment, ...state.comments];
+                    // state.comments.push(action.payload.comment)
                     state.success = action.payload.message;
                 } else {
                     state.error = 'Task not set';
@@ -409,5 +415,5 @@ export const selectAssignedTasks = (state: RootState) => state.tasks.assignedTas
 export const selectAllTaskComments = (state: RootState) => state.tasks.comments;
 
 // Actions and reducer export
-export const { resetMessages, setMyTasks, setAssignedTasks, setSelectedTask, resetSelectedTask, setError } = taskSlice.actions;
+export const { resetMessages, resetTasks, setSelectedTask, resetSelectedTask, setError } = taskSlice.actions;
 export default taskSlice.reducer;

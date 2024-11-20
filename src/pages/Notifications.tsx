@@ -12,12 +12,20 @@ const Notification: React.FC = () => {
     const {
         allNotifications,
         handleNotificationBarClose,
+        handleScroll,
     } = useMainNavbar();
 
     useNotificaion();
 
     return (
-        <Box display="flex" justifyContent="center" alignItems="center">
+        <Box display="flex" justifyContent="center" alignItems="center"
+            sx={{
+                maxHeight: '100vh',
+                overflowY: 'auto',
+                paddingRight: '16px',
+            }}
+            onScroll={handleScroll}
+        >
             <NotificationBar
                 notifications={allNotifications}
                 pageMode={isNotificationsPageMode}

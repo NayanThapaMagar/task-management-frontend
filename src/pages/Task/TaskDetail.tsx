@@ -72,7 +72,9 @@ const TaskDetail: React.FC = () => {
                     <Typography variant="h5">Task Detail</Typography>
                     <Divider sx={{ mt: 2, mb: 2 }} />
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Box margin="normal">
+                        <Box margin="normal" sx={{
+                            flexGrow: 1,
+                        }}>
                             <TextField
                                 fullWidth
                                 margin="normal"
@@ -80,7 +82,7 @@ const TaskDetail: React.FC = () => {
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
                                 sx={{
-                                    maxWidth: '300px',
+                                    flexGrow: 1,
                                     minWidth: '200px',
                                     '& fieldset': editMode.title ? { border: 1 } : { border: 'none' },
                                     '& input': {
@@ -100,7 +102,7 @@ const TaskDetail: React.FC = () => {
                             />
                         </Box>
 
-                        <Box display="flex" alignItems="center" margin="normal">
+                        <Box display="flex" alignItems="center" marginLeft={2}>
                             <Typography variant="body1" fontWeight="bold" sx={{ marginRight: 1 }}>
                                 Status:
                             </Typography>
@@ -259,9 +261,9 @@ const TaskDetail: React.FC = () => {
                                     <FormControl fullWidth margin="normal">
                                         {/* <FormLabel>View Subtasks</FormLabel> */}
                                         <RadioGroup row value={subtaskCategory} onChange={handleSubtaskCategoryChange}>
-                                            <FormControlLabel value="all" control={<Radio />} label="All Tasks" />
-                                            <FormControlLabel value="myTasks" control={<Radio />} label="My Tasks" />
-                                            <FormControlLabel value="assignedTasks" control={<Radio />} label="Assigned Tasks" />
+                                            <FormControlLabel value="all" control={<Radio />} label="All Subtasks" />
+                                            <FormControlLabel value="myTasks" control={<Radio />} label="My Subtasks" />
+                                            <FormControlLabel value="assignedTasks" control={<Radio />} label="Assigned Subtasks" />
                                         </RadioGroup>
                                     </FormControl>
                                     <FormControl variant="outlined" style={{ width: '150px' }} margin="normal">
@@ -311,7 +313,24 @@ const TaskDetail: React.FC = () => {
                                                 }}
                                             >
                                                 <Box mb={2}>
-                                                    <h3>{status}</h3>
+                                                    <Box
+                                                        sx={{
+                                                            marginBottom: '16px',
+                                                            padding: '8px',
+                                                            borderRadius: '4px',
+                                                            textAlign: 'center',
+                                                        }}
+                                                    >
+                                                        <h3
+                                                            style={{
+                                                                margin: 0,
+                                                                color: '#333',
+                                                                fontWeight: '500',
+                                                            }}
+                                                        >
+                                                            {status}
+                                                        </h3>
+                                                    </Box>
                                                     <SubtaskCard taskId={selectedTask?._id as string} subtasks={subtasks} onSubtaskClick={handleSubtaskClick} draggedSubtaskStatus={status} onSubtaskDragStart={handleDragSubtaskStart} />
                                                 </Box>
                                             </Box>
