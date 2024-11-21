@@ -27,6 +27,7 @@ const TaskDetail: React.FC = () => {
         handleAssignedToChange,
         handleComponentClick,
         handleUpdate,
+        handleScroll,
         handleClose,
         loading,
         success,
@@ -35,8 +36,6 @@ const TaskDetail: React.FC = () => {
         handleSnackbarClose,
 
     } = useSubtaskDetail();
-
-    const navigate = useNavigate();
 
     // Styles for the typing area (editor)
     const readModeReactQuillStyles = {
@@ -59,209 +58,218 @@ const TaskDetail: React.FC = () => {
                     <CircularProgress />
                 </Box>
             ) : (
-                <Box sx={{ p: 2, mt: 2 }}>
-                    <Typography variant="h5">Subtask Detail</Typography>
-                    <Divider sx={{ mt: 2, mb: 2 }} />
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Box margin="normal">
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                                sx={{
-                                    maxWidth: '300px',
-                                    minWidth: '200px',
-                                    '& fieldset': editMode.title ? { border: 1 } : { border: 'none' },
-                                    '& input': {
-                                        fontWeight: 'bolder',
-                                        fontSize: '1.4rem',
-                                    },
-                                    '&:hover': {
-                                        backgroundColor: '#f0f0f0',
-                                    },
-                                }}
-                                slotProps={{
-                                    input: {
-                                        readOnly: !editMode.title,
-                                    },
-                                }}
-                                onClick={() => handleComponentClick('title')}
-                            />
+                <Box
+                    sx={{
+                        overflow: 'auto',
+                        maxHeight: 'calc(100vh - 66px)',
+                        maxWidth: 'calc(100vw - 57px)',
+                    }}
+                    onScroll={handleScroll}
+                >
+                    <Box sx={{ p: 2, pt: 4, pb: 4 }}>
+                        <Typography variant="h5">Subtask Detail</Typography>
+                        <Divider sx={{ mt: 2, mb: 2 }} />
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                            <Box margin="normal">
+                                <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                    sx={{
+                                        maxWidth: '300px',
+                                        minWidth: '200px',
+                                        '& fieldset': editMode.title ? { border: 1 } : { border: 'none' },
+                                        '& input': {
+                                            fontWeight: 'bolder',
+                                            fontSize: '1.4rem',
+                                        },
+                                        '&:hover': {
+                                            backgroundColor: '#f0f0f0',
+                                        },
+                                    }}
+                                    slotProps={{
+                                        input: {
+                                            readOnly: !editMode.title,
+                                        },
+                                    }}
+                                    onClick={() => handleComponentClick('title')}
+                                />
+                            </Box>
+
+                            <Box display="flex" alignItems="center" margin="normal">
+                                <Typography variant="body1" fontWeight="bold" sx={{ marginRight: 1 }}>
+                                    Status:
+                                </Typography>
+                                <Typography variant="body1" sx={{ minWidth: "54px" }}>{selectedSubtask?.status.toUpperCase()}</Typography>
+                            </Box>
                         </Box>
 
-                        <Box display="flex" alignItems="center" margin="normal">
-                            <Typography variant="body1" fontWeight="bold" sx={{ marginRight: 1 }}>
-                                Status:
-                            </Typography>
-                            <Typography variant="body1" sx={{ minWidth: "54px" }}>{selectedSubtask?.status.toUpperCase()}</Typography>
-                        </Box>
-                    </Box>
-
-                    <Box p={0.5}>
-                        <Box>
-                            <Typography variant="body1" fontWeight="bold" m={1}>Description</Typography>
-                            <Box onClick={() => handleComponentClick('description')}>
-                                {editMode.description && (
-                                    <div>
-                                        <ReactQuill
-                                            value={description}
-                                            onChange={setDescription}
-                                            style={{
-                                                marginBottom: '3rem',
-                                                height: 'auto',
-                                                minHeight: '350px',
-                                                overflowY: 'auto',
-                                            }}
-                                        />
-                                        <style>{`
-                                        div.ql-container.ql-snow.ql-disabled, .ql-editor {
+                        <Box p={0.5}>
+                            <Box>
+                                <Typography variant="body1" fontWeight="bold" m={1}>Description</Typography>
+                                <Box onClick={() => handleComponentClick('description')}>
+                                    {editMode.description && (
+                                        <Box>
+                                            <ReactQuill
+                                                value={description}
+                                                onChange={setDescription}
+                                                style={{
+                                                    marginBottom: '3rem',
+                                                    height: 'auto',
+                                                    minHeight: '350px',
+                                                    overflowY: 'auto',
+                                                }}
+                                            />
+                                            <style>{`
+                                        Box.ql-container.ql-snow.ql-disabled, .ql-editor {
                                             ${Object.entries(editModeReactQuillStyles).map(([key, value]) => `${key}: ${value};`).join(' ')}
                                         }
                                     `}</style>
-                                    </div>
-                                )}
-                                {!editMode.description && (
-                                    <div
-                                        onMouseEnter={() => setIsDescriptionHovered(true)}
-                                        onMouseLeave={() => setIsDescriptionHovered(false)}
-                                    >
+                                        </Box>
+                                    )}
+                                    {!editMode.description && (
+                                        <Box
+                                            onMouseEnter={() => setIsDescriptionHovered(true)}
+                                            onMouseLeave={() => setIsDescriptionHovered(false)}
+                                        >
 
-                                        <ReactQuill
-                                            value={description}
-                                            style={{
-                                                marginBottom: '3rem',
-                                                height: 'auto',
-                                                minHeight: '350px',
-                                                overflowY: 'auto',
-                                            }}
-                                            readOnly={true}
-                                            theme="snow"
-                                            modules={{ toolbar: false }}
-                                        />
-                                        <style>{`
-                                        div.ql-container.ql-snow.ql-disabled, .ql-editor {
+                                            <ReactQuill
+                                                value={description}
+                                                style={{
+                                                    marginBottom: '3rem',
+                                                    height: 'auto',
+                                                    minHeight: '350px',
+                                                    overflowY: 'auto',
+                                                }}
+                                                readOnly={true}
+                                                theme="snow"
+                                                modules={{ toolbar: false }}
+                                            />
+                                            <style>{`
+                                        Box.ql-container.ql-snow.ql-disabled, .ql-editor {
                                             ${Object.entries(readModeReactQuillStyles).map(([key, value]) => `${key}: ${value};`).join(' ')}
                                         }
                                     `}</style>
-                                    </div>
-                                )}
-                            </Box>
-                        </Box>
-
-                        <Box display="flex" flexWrap="wrap" flexDirection="row" gap={2}>
-                            <Box flex={1} minWidth="200px" onClick={() => handleComponentClick('priority')}>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel shrink>Priority</InputLabel>
-                                    <Select
-                                        value={priority}
-                                        onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
-                                        label="Priority"
-                                        sx={{
-                                            '&:hover': {
-                                                backgroundColor: '#f0f0f0',
-                                                cursor: 'pointer',
-                                            },
-                                        }}
-                                    >
-                                        <MenuItem value="low">Low</MenuItem>
-                                        <MenuItem value="medium">Medium</MenuItem>
-                                        <MenuItem value="high">High</MenuItem>
-                                    </Select>
-                                </FormControl>
+                                        </Box>
+                                    )}
+                                </Box>
                             </Box>
 
-                            <Box flex={1} minWidth="200px">
-                                <FormControl fullWidth margin="normal" onClick={() => handleComponentClick('assignedTo')}>
-                                    <InputLabel>Assign To</InputLabel>
-                                    <Select
-                                        multiple
-                                        value={assignedTo}
-                                        onChange={handleAssignedToChange}
-                                        input={<OutlinedInput label="Assign To" />}
-                                        renderValue={(selected) => (
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                {selected.map((value) => {
-                                                    const user = allConnections.find((connection) => connection._id === value);
-                                                    return user ? <Chip key={value} label={user.username} size='small' /> : null;
-                                                })}
-                                            </Box>
-                                        )}
-                                        MenuProps={{
-                                            PaperProps: {
-                                                style: {
-                                                    maxHeight: 200,
-                                                    overflowY: 'auto',
+                            <Box display="flex" flexWrap="wrap" flexDirection="row" gap={2}>
+                                <Box flex={1} minWidth="200px" onClick={() => handleComponentClick('priority')}>
+                                    <FormControl fullWidth margin="normal">
+                                        <InputLabel shrink>Priority</InputLabel>
+                                        <Select
+                                            value={priority}
+                                            onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
+                                            label="Priority"
+                                            sx={{
+                                                '&:hover': {
+                                                    backgroundColor: '#f0f0f0',
+                                                    cursor: 'pointer',
                                                 },
-                                            },
-                                        }}
-                                        sx={{
-                                            '&:hover': {
-                                                backgroundColor: '#f0f0f0',
-                                                cursor: 'pointer',
-                                            },
-                                        }}
-                                    >
-                                        {allConnections.map((connection) => (
-                                            <MenuItem key={connection._id} value={connection._id}>
-                                                {connection.username}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                                            }}
+                                        >
+                                            <MenuItem value="low">Low</MenuItem>
+                                            <MenuItem value="medium">Medium</MenuItem>
+                                            <MenuItem value="high">High</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+
+                                <Box flex={1} minWidth="200px">
+                                    <FormControl fullWidth margin="normal" onClick={() => handleComponentClick('assignedTo')}>
+                                        <InputLabel>Assign To</InputLabel>
+                                        <Select
+                                            multiple
+                                            value={assignedTo}
+                                            onChange={handleAssignedToChange}
+                                            input={<OutlinedInput label="Assign To" />}
+                                            renderValue={(selected) => (
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                    {selected.map((value) => {
+                                                        const user = allConnections.find((connection) => connection._id === value);
+                                                        return user ? <Chip key={value} label={user.username} size='small' /> : null;
+                                                    })}
+                                                </Box>
+                                            )}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    style: {
+                                                        maxHeight: 200,
+                                                        overflowY: 'auto',
+                                                    },
+                                                },
+                                            }}
+                                            sx={{
+                                                '&:hover': {
+                                                    backgroundColor: '#f0f0f0',
+                                                    cursor: 'pointer',
+                                                },
+                                            }}
+                                        >
+                                            {allConnections.map((connection) => (
+                                                <MenuItem key={connection._id} value={connection._id}>
+                                                    {connection.username}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
                             </Box>
                         </Box>
-                    </Box>
 
-                    <Divider sx={{ mt: 2, mb: 2 }} />
+                        <Divider sx={{ mt: 2, mb: 2 }} />
 
-                    <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
-                        {(editMode.title || editMode.description || editMode.priority || editMode.assignedTo) && (
+                        <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
+                            {(editMode.title || editMode.description || editMode.priority || editMode.assignedTo) && (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleUpdate}
+                                    sx={{
+                                        px: 3,
+                                        py: 1,
+                                        fontWeight: 'bold',
+                                        borderRadius: 2,
+                                        backgroundColor: 'primary.main',
+                                        '&:hover': {
+                                            backgroundColor: 'primary.dark',
+                                        },
+                                    }}
+                                >
+                                    Save Changes
+                                </Button>
+                            )}
+
                             <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleUpdate}
+                                onClick={handleClose}
                                 sx={{
                                     px: 3,
                                     py: 1,
                                     fontWeight: 'bold',
                                     borderRadius: 2,
-                                    backgroundColor: 'primary.main',
+                                    color: 'text.secondary',
+                                    backgroundColor: 'grey.100',
                                     '&:hover': {
-                                        backgroundColor: 'primary.dark',
+                                        backgroundColor: 'grey.200',
                                     },
                                 }}
                             >
-                                Save Changes
+                                Close
                             </Button>
-                        )}
+                        </Box>
 
-                        <Button
-                            onClick={handleClose}
-                            sx={{
-                                px: 3,
-                                py: 1,
-                                fontWeight: 'bold',
-                                borderRadius: 2,
-                                color: 'text.secondary',
-                                backgroundColor: 'grey.100',
-                                '&:hover': {
-                                    backgroundColor: 'grey.200',
-                                },
-                            }}
-                        >
-                            Close
-                        </Button>
-                    </Box>
+                        <Typography variant="body1" fontWeight="bold" m={1}>Activity</Typography>
 
-                    <Typography variant="body1" fontWeight="bold" m={1}>Activity</Typography>
+                        <CommentBox taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
 
-                    <CommentBox taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
+                        <CommentCard comments={allSubtaskComments} taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
 
-                    <CommentCard comments={allSubtaskComments} taskId={selectedTask?._id as string} subtaskId={selectedSubtask?._id as string} />
-
-                </Box >
+                    </Box >
+                </Box>
             )}
 
             {(success || error) && (

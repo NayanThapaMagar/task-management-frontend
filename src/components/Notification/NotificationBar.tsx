@@ -28,6 +28,7 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
         handleNotificationClick,
         filteredNotifications,
         toggleMenu,
+        handleScroll,
         handleMenuClose,
         navigate,
     } = useNotificationBar(notifications, onClose)
@@ -36,7 +37,10 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
 
     return (
         <Box
-            sx={{
+            style={{
+                height: '100%',
+                maxHeight: 'inherit',
+                // overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 paddingBottom: '12px',
@@ -44,34 +48,66 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
                 maxWidth,
             }}
         >
-            <Box ml={2} mr={2} mt={3} mb={1}>
-                <Box sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                }}>
-                    <Typography variant="body1" sx={{
-                        fontFamily: 'Roboto, Arial, sans-serif',
-                        fontWeight: 550,
-                        fontSize: '1.5rem',
-                        color: 'text.primary',
-                    }}>
+            {/* Header Section */}
+            <Box
+                ml={2}
+                mr={2}
+                mt={3}
+                mb={1}
+                sx={{
+                    flexShrink: 0,
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            fontFamily: 'Roboto, Arial, sans-serif',
+                            fontWeight: 550,
+                            fontSize: '1.5rem',
+                            color: 'text.primary',
+                        }}
+                    >
                         Notifications
                     </Typography>
 
-                    <IconButton onClick={toggleMenu} >
+                    <IconButton onClick={toggleMenu}>
                         <MoreHoriz />
                     </IconButton>
-                    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                    >
                         <MenuItem onClick={markAllAsRead}>Mark All as Read</MenuItem>
-                        {!pageMode && <MenuItem onClick={() => { handleMenuClose(); onClose(); navigate('/notifications') }}>
-                            Open Notifications
-                        </MenuItem>}
+                        {!pageMode && (
+                            <MenuItem
+                                onClick={() => {
+                                    handleMenuClose();
+                                    onClose();
+                                    navigate('/notifications');
+                                }}
+                            >
+                                Open Notifications
+                            </MenuItem>
+                        )}
                     </Menu>
                 </Box>
             </Box>
 
-            <Box ml={3} >
+            {/* Filter Buttons Section */}
+            <Box
+                ml={3}
+                sx={{
+                    flexShrink: 0,
+                }}
+            >
                 <Button
                     variant={showUnread ? 'contained' : 'text'}
                     sx={{
@@ -80,10 +116,14 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
                         marginRight: 1,
                         textTransform: 'none',
                         borderRadius: 5,
-                        color: showUnread ? "white" : 'inherit',
-                        backgroundColor: showUnread ? alpha(theme.palette.primary.main, 0.9) : 'inherit',
+                        color: showUnread ? 'white' : 'inherit',
+                        backgroundColor: showUnread
+                            ? alpha(theme.palette.primary.main, 0.9)
+                            : 'inherit',
                         '&:hover': {
-                            backgroundColor: showUnread ? alpha(theme.palette.primary.main, 0.6) : 'grey.300',
+                            backgroundColor: showUnread
+                                ? alpha(theme.palette.primary.main, 0.6)
+                                : 'grey.300',
                         },
                     }}
                     onClick={() => setShowUnread(false)}
@@ -98,9 +138,13 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
                         textTransform: 'none',
                         borderRadius: 5,
                         color: showUnread ? 'inherit' : 'white',
-                        backgroundColor: showUnread ? 'inherit' : alpha(theme.palette.primary.main, 0.9),
+                        backgroundColor: showUnread
+                            ? 'inherit'
+                            : alpha(theme.palette.primary.main, 0.9),
                         '&:hover': {
-                            backgroundColor: showUnread ? 'grey.300' : alpha(theme.palette.primary.main, 0.6),
+                            backgroundColor: showUnread
+                                ? 'grey.300'
+                                : alpha(theme.palette.primary.main, 0.6),
                         },
                     }}
                     onClick={() => setShowUnread(true)}
@@ -111,67 +155,65 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
 
             <Divider sx={{ mt: 1 }} />
 
-
-
-            <List sx={{
-                padding: 0,
-                // overflowY: 'hidden',
-                minWidth: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-            }}
+            {/* Notifications List Section */}
+            <Box
+                sx={{
+                    flexGrow: 1, // Make the list grow to take up remaining space
+                    overflowY: 'auto', // Enable scrolling within this section
+                    padding: 0,
+                    minWidth: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+                onScroll={handleScroll}
             >
-                {filteredNotifications.length === 0 ? (
-                    <Card
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            maxWidth: 400,
-                            padding: 3,
-                            textAlign: 'center',
-                            boxShadow: 'none'
-                        }}
-                    >
-                        <CardContent>
-                            <NotificationsIcon
-                                sx={{ fontSize: 60, color: 'grey.500', marginBottom: 2 }}
-                            />
-                            <Typography
-                                variant="h6"
-                                color="textSecondary"
-                                gutterBottom
-                            >
-                                No Notifications Found
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                                You currently don't have any notifications. Check back later!
-                            </Typography>
-                            {/* <Button
-                                variant="contained"
-                                color="primary"
-                                sx={{ marginTop: 2 }}
-                                onClick={() => console.log('Refresh notifications')} // Replace with actual refresh logic
-                            >
-                                Refresh
-                            </Button> */}
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <Box width={'100%'}>
-                        {filteredNotifications.map((notification) => (
-                            <NotificationCard
-                                key={notification._id}
-                                notification={notification}
-                                onMarkAsRead={markAsRead}
-                                onMarkAsUnread={markAsUnread}
-                                onDelete={handleDeleteNotification}
-                                onNotificationClick={handleNotificationClick}
-                            />
-                        ))}
-                    </Box>
-                )}
-            </List>
-        </Box >
+                <List>
+                    {filteredNotifications.length === 0 ? (
+                        <Card
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                maxWidth: 400,
+                                padding: 3,
+                                textAlign: 'center',
+                                boxShadow: 'none',
+                            }}
+                        >
+                            <CardContent>
+                                <NotificationsIcon
+                                    sx={{ fontSize: 60, color: 'grey.500', marginBottom: 2 }}
+                                />
+                                <Typography
+                                    variant="h6"
+                                    color="textSecondary"
+                                    gutterBottom
+                                >
+                                    No Notifications Found
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    You currently don't have any notifications. Check back
+                                    later!
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <Box width={'100%'}>
+                            {filteredNotifications.map((notification) => (
+                                <NotificationCard
+                                    key={notification._id}
+                                    notification={notification}
+                                    onMarkAsRead={markAsRead}
+                                    onMarkAsUnread={markAsUnread}
+                                    onDelete={handleDeleteNotification}
+                                    onNotificationClick={handleNotificationClick}
+                                />
+                            ))}
+                        </Box>
+                    )}
+                </List>
+            </Box>
+        </Box>
+
     );
 };
 

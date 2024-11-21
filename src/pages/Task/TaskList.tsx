@@ -84,13 +84,13 @@ const Task: React.FC = () => {
                         </Select>
                     </FormControl>
                 </Box>
-
+{/* 
                 {loading ? (
                     <CircularProgress />
-                ) : (
+                ) : ( */}
                     <Box
                         sx={{
-                            maxHeight: '30vh',
+                            maxHeight: '20vh',
                             overflowY: 'auto',
                             paddingRight: '16px',
                         }}
@@ -163,7 +163,7 @@ const Task: React.FC = () => {
                         </Box>
                     </Box>
 
-                )}
+                {/* // )} */}
 
                 <br />
 

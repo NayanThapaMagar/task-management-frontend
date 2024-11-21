@@ -9,7 +9,7 @@ import { AppDispatch, RootState } from '../../store';
 const useTaskList = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { loading, error, success } = useSelector((state: RootState) => state.tasks);
+    const { loading, error, success, hasMoreTasks } = useSelector((state: RootState) => state.tasks);
 
     const allTasks = useSelector(selectAllTasks);
     const myTasks = useSelector(selectMyTasks);
@@ -32,23 +32,33 @@ const useTaskList = () => {
         const query: Record<string, string> = {};
         if (taskPriorityFilter !== 'all') query.priority = taskPriorityFilter;
 
+
+        console.log(`Fetching ${page !== 1 ? 'more' : ''} tasks at page ${page}`);
         if (taskCategory === 'all') {
-            await dispatch(fetchAllTasks({ ...query, page, limit: 20 }));
+            query.status = 'to do';
+            await dispatch(fetchAllTasks({ ...query, page, limit: 3 }));
+            query.status = 'pending';
+            await dispatch(fetchAllTasks({ ...query, page, limit: 3 }));
+            query.status = 'completed';
+            await dispatch(fetchAllTasks({ ...query, page, limit: 3 }));
         } else if (taskCategory === 'myTasks') {
             await dispatch(fetchMyTasks({ ...query, page, limit: 20 }));
         } else if (taskCategory === 'assignedTasks') {
             await dispatch(fetchAssignedTasks({ ...query, page, limit: 20 }));
         }
     };
-    const fetchMoreTasks = async () => {
-        setPage((prev) => prev + 1);
-        await fetchTasks();
-    }
+
+    useEffect(() => {
+        // fetching more task if any
+        if (page > 1) {
+            fetchTasks();
+        }
+    }, [page]);
 
     useEffect(() => {
         fetchTasks();
         return () => { dispatch(resetTasks()) }
-    }, [taskPriorityFilter, taskCategory, dispatch]);
+    }, [taskPriorityFilter, taskCategory]);
 
     useEffect(() => {
         const tasks = taskCategory === 'all' ? allTasks : taskCategory === 'myTasks' ? myTasks : assignedTasks;
@@ -94,8 +104,8 @@ const useTaskList = () => {
     const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
         const scrollContainer = e.currentTarget;
 
-        if (!loading && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
-            fetchMoreTasks();
+        if (!loading && hasMoreTasks && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
+            setPage((prev) => prev + 1);
         }
     };
 

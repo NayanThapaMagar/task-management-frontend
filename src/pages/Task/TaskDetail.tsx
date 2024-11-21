@@ -37,6 +37,7 @@ const TaskDetail: React.FC = () => {
         handleDragSubtaskStart,
         handleDragSubtaskOver,
         handleDropSubtask,
+        handleScroll,
         handleClose,
         loading,
         success,
@@ -68,164 +69,172 @@ const TaskDetail: React.FC = () => {
                     <CircularProgress />
                 </Box>
             ) : (
-                <Box sx={{ p: 2, mt: 2 }}>
-                    <Typography variant="h5">Task Detail</Typography>
-                    <Divider sx={{ mt: 2, mb: 2 }} />
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Box margin="normal" sx={{
-                            flexGrow: 1,
-                        }}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                                sx={{
-                                    flexGrow: 1,
-                                    minWidth: '200px',
-                                    '& fieldset': editMode.title ? { border: 1 } : { border: 'none' },
-                                    '& input': {
-                                        fontWeight: 'bolder',
-                                        fontSize: '1.4rem',
-                                    },
-                                    '&:hover': {
-                                        backgroundColor: '#f0f0f0',
-                                    },
-                                }}
-                                slotProps={{
-                                    input: {
-                                        readOnly: !editMode.title,
-                                    },
-                                }}
-                                onClick={() => handleComponentClick('title')}
-                            />
+                <Box
+                    sx={{
+                        overflow: 'auto',
+                        maxHeight: 'calc(100vh - 66px)',
+                        maxWidth: 'calc(100vw - 57px)',
+                    }}
+                    onScroll={handleScroll}
+                >
+                    <Box sx={{ p: 2, pt: 4, pb: 4 }}>
+                        <Typography variant="h5">Task Detail</Typography>
+                        <Divider sx={{ mt: 2, mb: 2 }} />
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                            <Box margin="normal" sx={{
+                                flexGrow: 1,
+                            }}>
+                                <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                    sx={{
+                                        flexGrow: 1,
+                                        minWidth: '200px',
+                                        '& fieldset': editMode.title ? { border: 1 } : { border: 'none' },
+                                        '& input': {
+                                            fontWeight: 'bolder',
+                                            fontSize: '1.4rem',
+                                        },
+                                        '&:hover': {
+                                            backgroundColor: '#f0f0f0',
+                                        },
+                                    }}
+                                    slotProps={{
+                                        input: {
+                                            readOnly: !editMode.title,
+                                        },
+                                    }}
+                                    onClick={() => handleComponentClick('title')}
+                                />
+                            </Box>
+
+                            <Box display="flex" alignItems="center" marginLeft={2}>
+                                <Typography variant="body1" fontWeight="bold" sx={{ marginRight: 1 }}>
+                                    Status:
+                                </Typography>
+                                <Typography variant="body1" sx={{ minWidth: "54px" }}>{selectedTask?.status.toUpperCase()}</Typography>
+                            </Box>
                         </Box>
 
-                        <Box display="flex" alignItems="center" marginLeft={2}>
-                            <Typography variant="body1" fontWeight="bold" sx={{ marginRight: 1 }}>
-                                Status:
-                            </Typography>
-                            <Typography variant="body1" sx={{ minWidth: "54px" }}>{selectedTask?.status.toUpperCase()}</Typography>
-                        </Box>
-                    </Box>
-
-                    <Box p={0.5}>
-                        <Box>
-                            <Typography variant="body1" fontWeight="bold" m={1}>Description</Typography>
-                            <Box onClick={() => handleComponentClick('description')}>
-                                {editMode.description && (
-                                    <div>
-                                        <ReactQuill
-                                            value={description}
-                                            onChange={setDescription}
-                                            style={{
-                                                marginBottom: '3rem',
-                                                height: 'auto',
-                                                minHeight: '350px',
-                                                overflowY: 'auto',
-                                            }}
-                                        />
-                                        <style>{`
-                                        div.ql-container.ql-snow.ql-disabled, .ql-editor {
+                        <Box p={0.5}>
+                            <Box>
+                                <Typography variant="body1" fontWeight="bold" m={1}>Description</Typography>
+                                <Box onClick={() => handleComponentClick('description')}>
+                                    {editMode.description && (
+                                        <Box>
+                                            <ReactQuill
+                                                value={description}
+                                                onChange={setDescription}
+                                                style={{
+                                                    marginBottom: '3rem',
+                                                    height: 'auto',
+                                                    minHeight: '350px',
+                                                    overflowY: 'auto',
+                                                }}
+                                            />
+                                            <style>{`
+                                        Box.ql-container.ql-snow.ql-disabled, .ql-editor {
                                             ${Object.entries(editModeReactQuillStyles).map(([key, value]) => `${key}: ${value};`).join(' ')}
                                         }
                                     `}</style>
-                                    </div>
-                                )}
-                                {!editMode.description && (
-                                    <div
-                                        onMouseEnter={() => setIsDescriptionHovered(true)}
-                                        onMouseLeave={() => setIsDescriptionHovered(false)}
-                                    >
+                                        </Box>
+                                    )}
+                                    {!editMode.description && (
+                                        <Box
+                                            onMouseEnter={() => setIsDescriptionHovered(true)}
+                                            onMouseLeave={() => setIsDescriptionHovered(false)}
+                                        >
 
-                                        <ReactQuill
-                                            value={description}
-                                            style={{
-                                                marginBottom: '3rem',
-                                                height: 'auto',
-                                                minHeight: '350px',
-                                                overflowY: 'auto',
-                                            }}
-                                            readOnly={true}
-                                            theme="snow"
-                                            modules={{ toolbar: false }}
-                                        />
-                                        <style>{`
-                                        div.ql-container.ql-snow.ql-disabled, .ql-editor {
+                                            <ReactQuill
+                                                value={description}
+                                                style={{
+                                                    marginBottom: '3rem',
+                                                    height: 'auto',
+                                                    minHeight: '350px',
+                                                    overflowY: 'auto',
+                                                }}
+                                                readOnly={true}
+                                                theme="snow"
+                                                modules={{ toolbar: false }}
+                                            />
+                                            <style>{`
+                                        Box.ql-container.ql-snow.ql-disabled, .ql-editor {
                                             ${Object.entries(readModeReactQuillStyles).map(([key, value]) => `${key}: ${value};`).join(' ')}
                                         }
                                     `}</style>
-                                    </div>
-                                )}
-                            </Box>
-                        </Box>
-
-                        <Box display="flex" flexWrap="wrap" flexDirection="row" gap={2}>
-                            <Box flex={1} minWidth="200px" onClick={() => handleComponentClick('priority')}>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel shrink>Priority</InputLabel>
-                                    <Select
-                                        value={priority}
-                                        onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
-                                        label="Priority"
-                                        sx={{
-                                            '&:hover': {
-                                                backgroundColor: '#f0f0f0',
-                                                cursor: 'pointer',
-                                            },
-                                        }}
-                                    >
-                                        <MenuItem value="low">Low</MenuItem>
-                                        <MenuItem value="medium">Medium</MenuItem>
-                                        <MenuItem value="high">High</MenuItem>
-                                    </Select>
-                                </FormControl>
+                                        </Box>
+                                    )}
+                                </Box>
                             </Box>
 
-                            <Box flex={1} minWidth="200px">
-                                <FormControl fullWidth margin="normal" onClick={() => handleComponentClick('assignedTo')}>
-                                    <InputLabel>Assign To</InputLabel>
-                                    <Select
-                                        multiple
-                                        value={assignedTo}
-                                        onChange={handleAssignedToChange}
-                                        input={<OutlinedInput label="Assign To" />}
-                                        renderValue={(selected) => (
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                {selected.map((value) => {
-                                                    const user = allConnections.find((connection) => connection._id === value);
-                                                    return user ? <Chip key={value} label={user.username} size='small' /> : null;
-                                                })}
-                                            </Box>
-                                        )}
-                                        MenuProps={{
-                                            PaperProps: {
-                                                style: {
-                                                    maxHeight: 200,
-                                                    overflowY: 'auto',
+                            <Box display="flex" flexWrap="wrap" flexDirection="row" gap={2}>
+                                <Box flex={1} minWidth="200px" onClick={() => handleComponentClick('priority')}>
+                                    <FormControl fullWidth margin="normal">
+                                        <InputLabel shrink>Priority</InputLabel>
+                                        <Select
+                                            value={priority}
+                                            onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
+                                            label="Priority"
+                                            sx={{
+                                                '&:hover': {
+                                                    backgroundColor: '#f0f0f0',
+                                                    cursor: 'pointer',
                                                 },
-                                            },
-                                        }}
-                                        sx={{
-                                            '&:hover': {
-                                                backgroundColor: '#f0f0f0',
-                                                cursor: 'pointer',
-                                            },
-                                        }}
-                                    >
-                                        {allConnections.map((connection) => (
-                                            <MenuItem key={connection._id} value={connection._id}>
-                                                {connection.username}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                                            }}
+                                        >
+                                            <MenuItem value="low">Low</MenuItem>
+                                            <MenuItem value="medium">Medium</MenuItem>
+                                            <MenuItem value="high">High</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+
+                                <Box flex={1} minWidth="200px">
+                                    <FormControl fullWidth margin="normal" onClick={() => handleComponentClick('assignedTo')}>
+                                        <InputLabel>Assign To</InputLabel>
+                                        <Select
+                                            multiple
+                                            value={assignedTo}
+                                            onChange={handleAssignedToChange}
+                                            input={<OutlinedInput label="Assign To" />}
+                                            renderValue={(selected) => (
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                    {selected.map((value) => {
+                                                        const user = allConnections.find((connection) => connection._id === value);
+                                                        return user ? <Chip key={value} label={user.username} size='small' /> : null;
+                                                    })}
+                                                </Box>
+                                            )}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    style: {
+                                                        maxHeight: 200,
+                                                        overflowY: 'auto',
+                                                    },
+                                                },
+                                            }}
+                                            sx={{
+                                                '&:hover': {
+                                                    backgroundColor: '#f0f0f0',
+                                                    cursor: 'pointer',
+                                                },
+                                            }}
+                                        >
+                                            {allConnections.map((connection) => (
+                                                <MenuItem key={connection._id} value={connection._id}>
+                                                    {connection.username}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
                             </Box>
                         </Box>
-                    </Box>
 
-                    {/* horizontal dashed line
+                        {/* horizontal dashed line
                     <Box
                         sx={{
                             mt: 2,
@@ -251,167 +260,168 @@ const TaskDetail: React.FC = () => {
                     </Box> */}
 
 
-                    {loading ? (
-                        <CircularProgress />
-                    ) : (
-                        <Box mt={4}>
-                            <Typography variant="body1" fontWeight="bold" m={1}>Subtask List</Typography>
-                            <Box>
-                                <Box display="flex" justifyContent="space-between" mb={2}>
-                                    <FormControl fullWidth margin="normal">
-                                        {/* <FormLabel>View Subtasks</FormLabel> */}
-                                        <RadioGroup row value={subtaskCategory} onChange={handleSubtaskCategoryChange}>
-                                            <FormControlLabel value="all" control={<Radio />} label="All Subtasks" />
-                                            <FormControlLabel value="myTasks" control={<Radio />} label="My Subtasks" />
-                                            <FormControlLabel value="assignedTasks" control={<Radio />} label="Assigned Subtasks" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                    <FormControl variant="outlined" style={{ width: '150px' }} margin="normal">
-                                        <InputLabel>Priority</InputLabel>
-                                        <Select
-                                            value={subtaskPriorityFilter}
-                                            onChange={handleSubtaskPriorityFilterChange}
-                                            label="Priority"
-                                        >
-                                            <MenuItem value="all">All</MenuItem>
-                                            <MenuItem value="high">High</MenuItem>
-                                            <MenuItem value="medium">Medium</MenuItem>
-                                            <MenuItem value="low">Low</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Box>
-
-                                {Object.values(groupedSubtasks).some((subtaskArray) => subtaskArray.length > 0)
-                                    && <Box
-                                        gap={1}
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            overflowX: 'auto',
-                                            flexWrap: 'nowrap',
-                                        }}
-                                    >
-                                        {Object.entries(groupedSubtasks).map(([status, subtasks]) => (
-                                            <Box
-                                                key={status}
-                                                onDragOver={handleDragSubtaskOver}
-                                                onDrop={(e) => handleDropSubtask(e, status)}
-                                                sx={{
-                                                    padding: 1,
-                                                    margin: 1,
-                                                    border: '1px solid #ccc',
-                                                    borderRadius: '8px',
-                                                    boxShadow: 2,
-                                                    backgroundColor: 'background.paper',
-                                                    minWidth: '150px',
-                                                    minHeight: '150px',
-                                                    flexGrow: 1,
-                                                    flexBasis: 0,
-                                                    '&:hover': {
-                                                        borderColor: 'currentcolor',
-                                                    },
-                                                }}
+                        {loading ? (
+                            <CircularProgress />
+                        ) : (
+                            <Box mt={4}>
+                                <Typography variant="body1" fontWeight="bold" m={1}>Subtask List</Typography>
+                                <Box>
+                                    <Box display="flex" justifyContent="space-between" mb={2}>
+                                        <FormControl fullWidth margin="normal">
+                                            {/* <FormLabel>View Subtasks</FormLabel> */}
+                                            <RadioGroup row value={subtaskCategory} onChange={handleSubtaskCategoryChange}>
+                                                <FormControlLabel value="all" control={<Radio />} label="All Subtasks" />
+                                                <FormControlLabel value="myTasks" control={<Radio />} label="My Subtasks" />
+                                                <FormControlLabel value="assignedTasks" control={<Radio />} label="Assigned Subtasks" />
+                                            </RadioGroup>
+                                        </FormControl>
+                                        <FormControl variant="outlined" style={{ width: '150px' }} margin="normal">
+                                            <InputLabel>Priority</InputLabel>
+                                            <Select
+                                                value={subtaskPriorityFilter}
+                                                onChange={handleSubtaskPriorityFilterChange}
+                                                label="Priority"
                                             >
-                                                <Box mb={2}>
-                                                    <Box
-                                                        sx={{
-                                                            marginBottom: '16px',
-                                                            padding: '8px',
-                                                            borderRadius: '4px',
-                                                            textAlign: 'center',
-                                                        }}
-                                                    >
-                                                        <h3
-                                                            style={{
-                                                                margin: 0,
-                                                                color: '#333',
-                                                                fontWeight: '500',
+                                                <MenuItem value="all">All</MenuItem>
+                                                <MenuItem value="high">High</MenuItem>
+                                                <MenuItem value="medium">Medium</MenuItem>
+                                                <MenuItem value="low">Low</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
+
+                                    {Object.values(groupedSubtasks).some((subtaskArray) => subtaskArray.length > 0)
+                                        && <Box
+                                            gap={1}
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                overflowX: 'auto',
+                                                flexWrap: 'nowrap',
+                                            }}
+                                        >
+                                            {Object.entries(groupedSubtasks).map(([status, subtasks]) => (
+                                                <Box
+                                                    key={status}
+                                                    onDragOver={handleDragSubtaskOver}
+                                                    onDrop={(e) => handleDropSubtask(e, status)}
+                                                    sx={{
+                                                        padding: 1,
+                                                        margin: 1,
+                                                        border: '1px solid #ccc',
+                                                        borderRadius: '8px',
+                                                        boxShadow: 2,
+                                                        backgroundColor: 'background.paper',
+                                                        minWidth: '150px',
+                                                        minHeight: '150px',
+                                                        flexGrow: 1,
+                                                        flexBasis: 0,
+                                                        '&:hover': {
+                                                            borderColor: 'currentcolor',
+                                                        },
+                                                    }}
+                                                >
+                                                    <Box mb={2}>
+                                                        <Box
+                                                            sx={{
+                                                                marginBottom: '16px',
+                                                                padding: '8px',
+                                                                borderRadius: '4px',
+                                                                textAlign: 'center',
                                                             }}
                                                         >
-                                                            {status}
-                                                        </h3>
+                                                            <h3
+                                                                style={{
+                                                                    margin: 0,
+                                                                    color: '#333',
+                                                                    fontWeight: '500',
+                                                                }}
+                                                            >
+                                                                {status}
+                                                            </h3>
+                                                        </Box>
+                                                        <SubtaskCard taskId={selectedTask?._id as string} subtasks={subtasks} onSubtaskClick={handleSubtaskClick} draggedSubtaskStatus={status} onSubtaskDragStart={handleDragSubtaskStart} />
                                                     </Box>
-                                                    <SubtaskCard taskId={selectedTask?._id as string} subtasks={subtasks} onSubtaskClick={handleSubtaskClick} draggedSubtaskStatus={status} onSubtaskDragStart={handleDragSubtaskStart} />
                                                 </Box>
-                                            </Box>
-                                        ))}
-                                    </Box>}
+                                            ))}
+                                        </Box>}
 
+                                </Box>
                             </Box>
-                        </Box>
-                    )}
+                        )}
 
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-                        <Button
-                            color="secondary"
-                            variant="outlined"
-                            startIcon={<PlaylistAddOutlinedIcon fontSize="medium" />}
-                            onClick={() => navigate('/tasks/addSubtask')}
-                            sx={{
-                                px: 3,
-                                py: 1,
-                                fontWeight: 'bold',
-                                borderRadius: 2,
-                                borderColor: 'secondary.main',
-                                '&:hover': {
-                                    color: 'white',
-                                    backgroundColor: 'secondary.light',
-                                    borderColor: 'secondary.dark',
-                                },
-                            }}
-                        >
-                            Add Subtask
-                        </Button>
-                    </Box>
-
-                    <Divider sx={{ mt: 2, mb: 2 }} />
-
-                    <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
-                        {(editMode.title || editMode.description || editMode.priority || editMode.assignedTo) && (
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                             <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleUpdate}
+                                color="secondary"
+                                variant="outlined"
+                                startIcon={<PlaylistAddOutlinedIcon fontSize="medium" />}
+                                onClick={() => navigate('/tasks/addSubtask')}
                                 sx={{
                                     px: 3,
                                     py: 1,
                                     fontWeight: 'bold',
                                     borderRadius: 2,
-                                    backgroundColor: 'primary.main',
+                                    borderColor: 'secondary.main',
                                     '&:hover': {
-                                        backgroundColor: 'primary.dark',
+                                        color: 'white',
+                                        backgroundColor: 'secondary.light',
+                                        borderColor: 'secondary.dark',
                                     },
                                 }}
                             >
-                                Save Changes
+                                Add Subtask
                             </Button>
-                        )}
+                        </Box>
 
-                        <Button
-                            onClick={handleClose}
-                            sx={{
-                                px: 3,
-                                py: 1,
-                                fontWeight: 'bold',
-                                borderRadius: 2,
-                                color: 'text.secondary',
-                                backgroundColor: 'grey.100',
-                                '&:hover': {
-                                    backgroundColor: 'grey.200',
-                                },
-                            }}
-                        >
-                            Close
-                        </Button>
-                    </Box>
+                        <Divider sx={{ mt: 2, mb: 2 }} />
 
-                    <Typography variant="body1" fontWeight="bold" mt={4}>Activity</Typography>
+                        <Box display="flex" justifyContent="flex-start" gap={2} mt={2}>
+                            {(editMode.title || editMode.description || editMode.priority || editMode.assignedTo) && (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleUpdate}
+                                    sx={{
+                                        px: 3,
+                                        py: 1,
+                                        fontWeight: 'bold',
+                                        borderRadius: 2,
+                                        backgroundColor: 'primary.main',
+                                        '&:hover': {
+                                            backgroundColor: 'primary.dark',
+                                        },
+                                    }}
+                                >
+                                    Save Changes
+                                </Button>
+                            )}
 
-                    <CommentBox taskId={selectedTask?._id as string} subtaskId={null} />
+                            <Button
+                                onClick={handleClose}
+                                sx={{
+                                    px: 3,
+                                    py: 1,
+                                    fontWeight: 'bold',
+                                    borderRadius: 2,
+                                    color: 'text.secondary',
+                                    backgroundColor: 'grey.100',
+                                    '&:hover': {
+                                        backgroundColor: 'grey.200',
+                                    },
+                                }}
+                            >
+                                Close
+                            </Button>
+                        </Box>
 
-                    <CommentCard comments={allTaskComments} taskId={selectedTask?._id as string} subtaskId={null} />
+                        <Typography variant="body1" fontWeight="bold" mt={4}>Activity</Typography>
 
-                </Box >
+                        <CommentBox taskId={selectedTask?._id as string} subtaskId={null} />
+
+                        <CommentCard comments={allTaskComments} taskId={selectedTask?._id as string} subtaskId={null} />
+
+                    </Box >
+                </Box>
             )}
 
             {(success || error) && (

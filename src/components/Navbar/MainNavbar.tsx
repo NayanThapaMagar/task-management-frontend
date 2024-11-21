@@ -48,7 +48,6 @@ const MainNavbar: React.FC = () => {
         handleNotificationBarClose,
         handleAccountMenuOpen,
         handleAccountMenuClose,
-        handleScroll,
         navigate,
         handleNavigation,
         handleLogout,
@@ -97,24 +96,34 @@ const MainNavbar: React.FC = () => {
                             open={Boolean(notificationAnchorEl)}
                             anchorEl={notificationAnchorEl}
                             onClose={handleNotificationBarClose}
-                            onScroll={handleScroll}
+                            // onScroll={handleScroll}
                             anchorOrigin={{
-                                vertical: 'bottom',
+                                vertical: 52,
                                 horizontal: 'center',
                             }}
                             transformOrigin={{
                                 vertical: 'top',
                                 horizontal: 'center',
                             }}
-                            // sx={{
-                            //     padding: '20px',
-                            //     color: 'red'
-                            // }}
+                            sx={{
+                                overflow: 'hidden',
+                                borderRadius: '0px',
+                                boxShadow: 'none',
+                                maxHeight: '95vh',
+                            }}
                         // disablePortal={true} // Ensures the popover doesn't trap focus
                         // disableEnforceFocus={true} // Prevents focus from being restricted within the popover
                         // disableAutoFocus={true} // Allows other buttons to retain focus behavior
                         >
-                            <NotificationBar notifications={allNotifications} maxWidth='350px' onClose={handleNotificationBarClose} />
+                            <Box
+                                // onScroll={handleScroll}
+                                style={{
+                                    maxHeight: '88vh',
+                                    overflowY: 'hidden',
+                                }}
+                            >
+                                <NotificationBar notifications={allNotifications} maxWidth='350px' onClose={handleNotificationBarClose} />
+                            </Box>
                         </Popover>
                     </Box>
                     <IconButton color="inherit" onClick={handleAccountMenuOpen} sx={{

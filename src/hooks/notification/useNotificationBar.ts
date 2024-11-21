@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
 import { Notification, SubTask, Task } from "../../types";
-import { fetchAllNotifications, markAllNotificationsAsRead, markNotificationAsRead, markNotificationAsUnread, deleteNotification } from "../../features/notificationSlice";
+import { fetchAllNotifications, markAllNotificationsAsRead, markNotificationAsRead, markNotificationAsUnread, deleteNotification, selectAllNotifications, selectUnReadNotifications, resetNotifications, resetUnReadNotifications } from "../../features/notificationSlice";
 import { setSelectedTask } from "../../features/taskSlice";
 import { setSelectedSubtask } from "../../features/subtaskSlice";
 import { useNavigate } from "react-router-dom";
@@ -11,15 +11,53 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
 
-    // const { loading, error, success } = useSelector((state: RootState) => state.notifications);
+    const { loading, error, success, hasMoreNotifications, hasMoreUnreadNotifications } = useSelector((state: RootState) => state.notifications);
 
+    const allNotifications = useSelector(selectAllNotifications)
+    const unReadNotifications = useSelector(selectUnReadNotifications)
     const [showUnread, setShowUnread] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+    const [notificationsPage, setNotificationsPage] = useState(1);
+    const [unReadNotificationsPage, setUnReadNotificationsPage] = useState(1);
 
-    const filteredNotifications = showUnread
-        ? notifications.filter((notification) => !notification.isRead)
-        : notifications;
+
+    const fetchNotificationsAtMount = async () => {
+        await dispatch(fetchAllNotifications({ isRead: false, page: 1, limit: 20 }));
+        await dispatch(fetchAllNotifications({ page: 1, limit: 20 }));
+    }
+    const fetchNotifications = async () => {
+        if (showUnread && hasMoreUnreadNotifications) {
+            console.log(`Fetching ${unReadNotificationsPage > 1 ? 'more' : ''} unread notifications at page ${unReadNotificationsPage}`);
+            await dispatch(fetchAllNotifications({ isRead: false, page: unReadNotificationsPage, limit: 20 }));
+            console.log("hasMoreUnreadNotifications:", hasMoreUnreadNotifications);
+        } else if (!showUnread && hasMoreNotifications) {
+            console.log(`Fetching ${notificationsPage > 1 ? 'more' : ''} notifications at page ${notificationsPage}`);
+            await dispatch(fetchAllNotifications({ page: notificationsPage, limit: 20 }));
+            console.log("hasMoreNotifications:", hasMoreNotifications);
+        }
+    };
+
+    useEffect(() => {
+        dispatch(resetNotifications())
+        dispatch(resetUnReadNotifications())
+        fetchNotificationsAtMount()
+        return () => {
+            console.log('unmount');
+            dispatch(resetNotifications())
+            dispatch(resetUnReadNotifications())
+        }
+    }, []);
+
+    useEffect(() => {
+        // fetching more NOTIFICATIOINS if any
+        if (notificationsPage > 1 || unReadNotificationsPage > 1) {
+            fetchNotifications();
+        }
+    }, [notificationsPage, unReadNotificationsPage]);
+
+    const filteredNotifications = showUnread ? unReadNotifications : allNotifications;
+    // ? notifications.filter((notification) => !notification.isRead)
 
     const markAsRead = async (notificationId: string) => {
         await dispatch(markNotificationAsRead(notificationId))
@@ -55,6 +93,27 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
         }
     };
 
+    const handleScroll = async (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+        const scrollContainer = e.currentTarget;
+
+        console.log('scrolling at bottom....', scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight);
+        // // // console.log("scrollTop:", scrollContainer.scrollTop);
+        // // // console.log("clientHeight:", scrollContainer.clientHeight);
+        // // // console.log("scrollHeight:", scrollContainer.scrollHeight);
+        // // console.log("hasMoreNotifications:", hasMoreNotifications);
+
+        // console.log({ hasMoreNotifications });
+        // console.log({ hasMoreUnreadNotifications });
+
+
+        if (!loading && !showUnread && hasMoreNotifications && (scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight)) {
+            setNotificationsPage((prev) => prev + 1);
+        }
+        if (!loading && showUnread && hasMoreUnreadNotifications && (scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight)) {
+            setUnReadNotificationsPage((prev) => prev + 1);
+        }
+    };
+
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
@@ -70,6 +129,7 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
         handleNotificationClick,
         filteredNotifications,
         toggleMenu,
+        handleScroll,
         handleMenuClose,
         navigate,
     }

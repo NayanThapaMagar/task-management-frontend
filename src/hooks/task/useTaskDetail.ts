@@ -3,7 +3,7 @@ import { marked } from "marked";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectAllTaskComments, updateTask, fetchAllTaskComments, resetSelectedTask, setError, resetMessages as resetTaskMessages } from "../../features/taskSlice";
+import { selectAllTaskComments, updateTask, fetchAllTaskComments, resetSelectedTask, resetComments, setError, resetMessages as resetTaskMessages } from "../../features/taskSlice";
 import { selectAllSubtasks, selectMySubtasks, selectAssignedSubtasks, fetchAllSubtasks, fetchMySubtasks, fetchAssignedSubtasks, updateSubtaskStatus, setSelectedSubtask, resetMessages as resetSubtaskMessages } from '../../features/subtaskSlice';
 import { selectAllConnections, fetchUserConnections } from "../../features/userConnectionSlice";
 import { AppDispatch, RootState } from "../../store";
@@ -18,7 +18,8 @@ const useTaskDetail = () => {
         loading: taskLoading,
         error: taskError,
         success: taskSuccess,
-        selectedTask
+        selectedTask,
+        hasMoreComments,
     } = useSelector((state: RootState) => state.tasks);
 
     const {
@@ -49,6 +50,9 @@ const useTaskDetail = () => {
         priority: false,
         assignedTo: false,
     });
+
+    const [commentPage, setCommentPage] = useState(1);
+
     // subtask
     const allSubtasks = useSelector(selectAllSubtasks);
     const mySubtasks = useSelector(selectMySubtasks);
@@ -85,13 +89,24 @@ const useTaskDetail = () => {
         setTaskDetail();
     }, [selectedTask]);
 
+    const fetchComments = async () => {
+        if (selectedTask) {
+            await dispatch(fetchAllTaskComments({ taskId: selectedTask._id, params: { page: commentPage, limit: 10 } }));
+        }
+    }
+
     useEffect(() => {
         dispatch(fetchUserConnections());
-        if (selectedTask) {
-            dispatch(fetchAllTaskComments(selectedTask._id));
-        }
+        fetchComments();
+        return () => { dispatch(resetComments()) }
     }, [dispatch]);
 
+    useEffect(() => {
+        // fetching more COMMENTS if any
+        if (commentPage > 1) {
+            fetchComments();
+        }
+    }, [commentPage]);
 
     // Subtasks
 
@@ -195,6 +210,14 @@ const useTaskDetail = () => {
 
 
     //-----//
+    const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+        const scrollContainer = e.currentTarget;
+
+        if (!loading && hasMoreComments && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
+            setCommentPage((prev) => prev + 1);
+        }
+    };
+
     const handleClose = () => {
         dispatch(resetSelectedTask());
         navigate('/tasks');
@@ -244,6 +267,7 @@ const useTaskDetail = () => {
         handleDragSubtaskStart,
         handleDragSubtaskOver,
         handleDropSubtask,
+        handleScroll,
         handleClose,
         loading,
         success,

@@ -16,6 +16,7 @@ interface SubtaskState {
     totalSubtasks: number;
     totalPages: number;
     selectedSubtask: SubTask | null;
+    hasMoreComments: boolean;
 }
 
 // Initial state
@@ -30,6 +31,7 @@ const initialState: SubtaskState = {
     totalSubtasks: 0,
     totalPages: 0,
     selectedSubtask: null,
+    hasMoreComments: true,
 };
 
 // Async actions
@@ -133,9 +135,9 @@ export const updateSubtaskStatus = createAsyncThunk(
 // fetch all subtask comments
 export const fetchAllSubtaskComments = createAsyncThunk(
     'subtasks/fetchComments',
-    async ({ taskId, subtaskId }: { taskId: string, subtaskId: string }, { rejectWithValue }) => {
+    async ({ taskId, subtaskId, params }: { taskId: string, subtaskId: string, params: { page: number; limit: number } }, { rejectWithValue }) => {
         try {
-            const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/${subtaskId}/comments`);
+            const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/${subtaskId}/comments`, { params });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching comments');
@@ -190,6 +192,9 @@ const subtaskSlice = createSlice({
         },
         setError(state, action: PayloadAction<string>) {
             state.error = action.payload;
+        },
+        resetComments: (state) => {
+            state.comments = [];
         },
         setSelectedSubtask: (state, action: PayloadAction<SubTask>) => {
             state.selectedSubtask = action.payload;
@@ -323,7 +328,12 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchAllSubtaskComments.fulfilled, (state, action: PayloadAction<any>) => {
                 if (state.selectedSubtask) {
-                    state.comments = [...state.comments, ...action.payload.comments];
+                    if (action.payload.comments.length > 0) {
+                        state.hasMoreComments = true
+                        state.comments = [...state.comments, ...action.payload.comments];
+                    } else {
+                        state.hasMoreComments = false
+                    }
                     // state.comments = action.payload.comments
                 } else {
                     state.error = 'Subtask not set';
@@ -393,7 +403,7 @@ const subtaskSlice = createSlice({
     },
 });
 
-export const { resetMessages, setError, setSelectedSubtask, resetSelectedSubtask } = subtaskSlice.actions;
+export const { resetMessages, resetComments, setError, setSelectedSubtask, resetSelectedSubtask } = subtaskSlice.actions;
 
 // Selectors
 export const selectAllSubtasks = (state: RootState) => state.subtasks.subtasks;

@@ -10,10 +10,10 @@ import { Socket } from "socket.io-client";
 
 const useMainNavbar = () => {
 
-    const dispatch: AppDispatch = useDispatch();
+    const dispatch  = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
-    const { loading, error, success } = useSelector((state: RootState) => state.notifications);
+    // const { loading, error, success } = useSelector((state: RootState) => state.notifications);
 
     const allNotifications = useSelector(selectAllNotifications)
     const unSeenNotifications = allNotifications.filter((notificaiton) => notificaiton.isSeen === false)
@@ -23,15 +23,8 @@ const useMainNavbar = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
 
-    const [page, setPage] = useState(1);
-
     const fetchNotifications = async () => {
-        await dispatch(fetchAllNotifications({ page, limit: 20 }));
-    };
-
-    const fetchMoreNotifications = async () => {
-        setPage((prev) => prev + 1);
-        await fetchNotifications();
+        await dispatch(fetchAllNotifications({ page: 1, limit: 50 }));
     };
 
     let socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
@@ -66,6 +59,7 @@ const useMainNavbar = () => {
             setNotificationAnchorEl(null);
         } else {
             setNotificationAnchorEl(event.currentTarget);
+            // fetchNotifications();
             await dispatch(markAllNotificationsAsSeen({ page: 1, limit: 20 }));
         }
     };
@@ -83,16 +77,6 @@ const useMainNavbar = () => {
         setAnchorEl(null);
     };
 
-    const handleScroll = async (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-        const scrollContainer = e.currentTarget;
-
-        console.log('scrolling...');
-        
-        if (!loading && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
-            console.log(`On page ${page} fetching more notifications....`);
-            await fetchMoreNotifications();
-        }
-    };
     // Function to handle navigation and close drawer
     const handleNavigation = (path: string) => {
         navigate(path);
@@ -114,7 +98,6 @@ const useMainNavbar = () => {
         handleNotificationBarClose,
         handleAccountMenuOpen,
         handleAccountMenuClose,
-        handleScroll,
         navigate,
         handleNavigation,
         handleLogout,

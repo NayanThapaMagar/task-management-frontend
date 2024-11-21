@@ -7,30 +7,37 @@ const BASE_URL = '/notifications';
 
 interface NotificationState {
     notifications: Notification[];
+    unReadNotifications: Notification[];
     loading: boolean;
     error: string | null;
     success: string | null;
     totalNotifications: number;
     totalPages: number;
+    hasMoreNotifications: boolean;
+    hasMoreUnreadNotifications: boolean;
 }
 
 // Initial state
 const initialState: NotificationState = {
     notifications: [],
+    unReadNotifications: [],
     loading: false,
     error: null,
     success: null,
     totalNotifications: 0,
     totalPages: 0,
+    hasMoreNotifications: true,
+    hasMoreUnreadNotifications: true,
 };
 
 // Async actions
-
+let isRead: boolean | undefined;
 // Fetch all notifications
 export const fetchAllNotifications = createAsyncThunk(
     'notifications/fetchAll',
-    async (params: { page: number; limit: number }, { rejectWithValue }) => {
+    async (params: { isRead?: boolean; page: number; limit: number }, { rejectWithValue }) => {
         try {
+            isRead = params.isRead;
             const { data } = await axiosInstance.get(`${BASE_URL}`, { params });
             return data;
         } catch (error: any) {
@@ -60,6 +67,8 @@ export const markNotificationAsUnread = createAsyncThunk(
             const { data } = await axiosInstance.patch(`${BASE_URL}/${notificationId}/unread`);
             return data;
         } catch (error: any) {
+            console.log({ error });
+
             return rejectWithValue(error.response?.data?.message || 'Error marking notification as unread');
         }
     }
@@ -116,6 +125,12 @@ const notificationSlice = createSlice({
         addNewNotification: (state, action: PayloadAction<Notification>) => {
             state.notifications = [action.payload, ...state.notifications];
         },
+        resetNotifications: (state) => {
+            state.notifications = [];
+        },
+        resetUnReadNotifications: (state) => {
+            state.unReadNotifications = [];
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -124,11 +139,33 @@ const notificationSlice = createSlice({
                 state.loading = true;
             })
             .addCase(fetchAllNotifications.fulfilled, (state, action: PayloadAction<any>) => {
-                state.loading = false;
-                state.notifications = [...state.notifications, ...action.payload.notifications];
+                console.log("----");
+
+                if (isRead === undefined) {
+                    // console.log("is read not given");
+                    if (action.payload.notifications.length > 0) {
+                        state.hasMoreNotifications = true
+                        state.notifications = [...state.notifications, ...action.payload.notifications];
+                        // console.log({ notifications: state.notifications });
+                    } else {
+                        state.hasMoreNotifications = false
+                    }
+                    state.loading = false;
+                } else if (isRead === false) {
+                    if (action.payload.notifications.length > 0) {
+                        // console.log("is read given");
+                        state.hasMoreUnreadNotifications = true
+                        state.unReadNotifications = [...state.unReadNotifications, ...action.payload.notifications];
+                        // console.log({ unReadNotifications: state.unReadNotifications });
+                    } else {
+                        state.hasMoreUnreadNotifications = false
+                    }
+                    state.loading = false;
+                }
+                // state.totalNotifications = action.payload.totalNotifications;
+                // state.totalPages = action.payload.totalPages;
+
                 // state.notifications = action.payload.notifications;
-                state.totalNotifications = action.payload.totalNotifications;
-                state.totalPages = action.payload.totalPages;
             })
             .addCase(fetchAllNotifications.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -140,8 +177,10 @@ const notificationSlice = createSlice({
                 state.loading = true;
             })
             .addCase(markNotificationAsRead.fulfilled, (state, action: PayloadAction<any>) => {
-                const index = state.notifications.findIndex((notification) => notification._id === action.payload.updatedNotification._id);
-                if (index !== -1) state.notifications[index] = action.payload.updatedNotification;
+                const indexOfAllNotifications = state.notifications.findIndex((notification) => notification._id === action.payload.updatedNotification._id);
+                if (indexOfAllNotifications !== -1) state.notifications[indexOfAllNotifications] = action.payload.updatedNotification;
+                const indexOfUnReadNotifications = state.unReadNotifications.findIndex((notification) => notification._id === action.payload.updatedNotification._id);
+                if (indexOfUnReadNotifications !== -1) state.unReadNotifications[indexOfUnReadNotifications] = action.payload.updatedNotification;
                 state.success = action.payload.message;
                 state.loading = false;
             })
@@ -155,8 +194,10 @@ const notificationSlice = createSlice({
                 state.loading = true;
             })
             .addCase(markNotificationAsUnread.fulfilled, (state, action: PayloadAction<any>) => {
-                const index = state.notifications.findIndex((notification) => notification._id === action.payload.updatedNotification._id);
-                if (index !== -1) state.notifications[index] = action.payload.updatedNotification;
+                const indexOfAllNotifications = state.notifications.findIndex((notification) => notification._id === action.payload.updatedNotification._id);
+                if (indexOfAllNotifications !== -1) state.notifications[indexOfAllNotifications] = action.payload.updatedNotification;
+                const indexOfUnReadNotifications = state.unReadNotifications.findIndex((notification) => notification._id === action.payload.updatedNotification._id);
+                if (indexOfUnReadNotifications !== -1) state.unReadNotifications[indexOfUnReadNotifications] = action.payload.updatedNotification;
                 state.success = action.payload.message;
                 state.loading = false;
             })
@@ -171,6 +212,7 @@ const notificationSlice = createSlice({
             })
             .addCase(markAllNotificationsAsRead.fulfilled, (state, action: PayloadAction<any>) => {
                 state.notifications = action.payload.updatedNotifications;
+                state.unReadNotifications = [];
                 state.success = action.payload.message;
                 state.loading = false;
             })
@@ -184,7 +226,7 @@ const notificationSlice = createSlice({
                 state.loading = true;
             })
             .addCase(markAllNotificationsAsSeen.fulfilled, (state, action: PayloadAction<any>) => {
-                state.notifications = action.payload.updatedNotifications;
+                // state.notifications = action.payload.updatedNotifications;
                 // state.success = action.payload.message;
                 state.loading = false;
             })
@@ -211,8 +253,9 @@ const notificationSlice = createSlice({
     },
 });
 
-export const { addNewNotification, resetMessages } = notificationSlice.actions;
+export const { addNewNotification, resetNotifications, resetUnReadNotifications, resetMessages } = notificationSlice.actions;
 
 export const selectAllNotifications = (state: RootState) => state.notifications.notifications;
+export const selectUnReadNotifications = (state: RootState) => state.notifications.unReadNotifications;
 
 export default notificationSlice.reducer;

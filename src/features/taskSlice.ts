@@ -16,6 +16,8 @@ interface TaskState {
     totalTasks: number;
     totalPages: number;
     selectedTask: Task | null;
+    hasMoreTasks: boolean;
+    hasMoreComments: boolean;
 }
 
 // Initial state
@@ -30,6 +32,8 @@ const initialState: TaskState = {
     totalTasks: 0,
     totalPages: 0,
     selectedTask: null,
+    hasMoreTasks: true,
+    hasMoreComments: true,
 };
 
 // Async actions
@@ -134,9 +138,9 @@ export const deleteTask = createAsyncThunk(
 // fetch all task comments
 export const fetchAllTaskComments = createAsyncThunk(
     'tasks/fetchComments',
-    async (taskId: string, { rejectWithValue }) => {
+    async ({ taskId, params }: { taskId: string, params: { isRead?: boolean; page: number; limit: number } }, { rejectWithValue }) => {
         try {
-            const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/comments`);
+            const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/comments`, { params });
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching comments');
@@ -195,6 +199,9 @@ const taskSlice = createSlice({
         resetTasks: (state) => {
             state.tasks = [];
         },
+        resetComments: (state) => {
+            state.comments = [];
+        },
         setAssignedTasks: (state, action: PayloadAction<Task[]>) => {
             state.assignedTasks = action.payload;
         },
@@ -213,7 +220,15 @@ const taskSlice = createSlice({
             })
             .addCase(fetchAllTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.tasks = [...state.tasks, ...action.payload.tasks];
+                if (action.payload.tasks.length !== 0) {
+                    console.log(action.payload.tasks.length);
+
+                    state.tasks = [...state.tasks, ...action.payload.tasks];
+                } else {
+                    state.hasMoreTasks = false;
+                    console.log(action.payload.tasks.length);
+
+                }
                 // state.tasks = action.payload.tasks;
                 // state.totalTasks = action.payload.totalTasks;
                 // state.totalPages = action.payload.totalPages;
@@ -337,7 +352,12 @@ const taskSlice = createSlice({
             })
             .addCase(fetchAllTaskComments.fulfilled, (state, action: PayloadAction<any>) => {
                 if (state.selectedTask) {
-                    state.comments = [...state.comments, ...action.payload.comments];
+                    if (action.payload.comments.length > 0) {
+                        state.hasMoreComments = true
+                        state.comments = [...state.comments, ...action.payload.comments];
+                    } else {
+                        state.hasMoreComments = false
+                    }
                     // state.comments = action.payload.comments
                 } else {
                     state.error = 'Task not set';
@@ -415,5 +435,5 @@ export const selectAssignedTasks = (state: RootState) => state.tasks.assignedTas
 export const selectAllTaskComments = (state: RootState) => state.tasks.comments;
 
 // Actions and reducer export
-export const { resetMessages, resetTasks, setSelectedTask, resetSelectedTask, setError } = taskSlice.actions;
+export const { resetMessages, resetTasks, resetComments, setSelectedTask, resetSelectedTask, setError } = taskSlice.actions;
 export default taskSlice.reducer;
