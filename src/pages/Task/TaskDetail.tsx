@@ -37,7 +37,9 @@ const TaskDetail: React.FC = () => {
         handleDragSubtaskStart,
         handleDragSubtaskOver,
         handleDropSubtask,
-        handleScroll,
+        isSubtasksAtScrollTop,
+        handleSubtasksScroll,
+        handleCommentsScroll,
         handleClose,
         loading,
         success,
@@ -75,18 +77,18 @@ const TaskDetail: React.FC = () => {
                         maxHeight: 'calc(100vh - 66px)',
                         maxWidth: 'calc(100vw - 57px)',
                     }}
-                    onScroll={handleScroll}
+                    onScroll={handleCommentsScroll}
                 >
                     <Box sx={{ p: 2, pt: 4, pb: 4 }}>
                         <Typography variant="h5">Task Detail</Typography>
                         <Divider sx={{ mt: 2, mb: 2 }} />
                         <Box display="flex" justifyContent="space-between" alignItems="center">
-                            <Box margin="normal" sx={{
+                            <Box margin="none" sx={{
                                 flexGrow: 1,
                             }}>
                                 <TextField
                                     fullWidth
-                                    margin="normal"
+                                    margin="none"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     required
@@ -172,7 +174,7 @@ const TaskDetail: React.FC = () => {
 
                             <Box display="flex" flexWrap="wrap" flexDirection="row" gap={2}>
                                 <Box flex={1} minWidth="200px" onClick={() => handleComponentClick('priority')}>
-                                    <FormControl fullWidth margin="normal">
+                                    <FormControl fullWidth margin="none">
                                         <InputLabel shrink>Priority</InputLabel>
                                         <Select
                                             value={priority}
@@ -193,7 +195,7 @@ const TaskDetail: React.FC = () => {
                                 </Box>
 
                                 <Box flex={1} minWidth="200px">
-                                    <FormControl fullWidth margin="normal" onClick={() => handleComponentClick('assignedTo')}>
+                                    <FormControl fullWidth margin="none" onClick={() => handleComponentClick('assignedTo')}>
                                         <InputLabel>Assign To</InputLabel>
                                         <Select
                                             multiple
@@ -267,7 +269,7 @@ const TaskDetail: React.FC = () => {
                                 <Typography variant="body1" fontWeight="bold" m={1}>Subtask List</Typography>
                                 <Box>
                                     <Box display="flex" justifyContent="space-between" mb={2}>
-                                        <FormControl fullWidth margin="normal">
+                                        <FormControl fullWidth margin="none">
                                             {/* <FormLabel>View Subtasks</FormLabel> */}
                                             <RadioGroup row value={subtaskCategory} onChange={handleSubtaskCategoryChange}>
                                                 <FormControlLabel value="all" control={<Radio />} label="All Subtasks" />
@@ -275,7 +277,7 @@ const TaskDetail: React.FC = () => {
                                                 <FormControlLabel value="assignedTasks" control={<Radio />} label="Assigned Subtasks" />
                                             </RadioGroup>
                                         </FormControl>
-                                        <FormControl variant="outlined" style={{ width: '150px' }} margin="normal">
+                                        <FormControl variant="outlined" style={{ width: '150px' }} margin="none">
                                             <InputLabel>Priority</InputLabel>
                                             <Select
                                                 value={subtaskPriorityFilter}
@@ -291,61 +293,82 @@ const TaskDetail: React.FC = () => {
                                     </Box>
 
                                     {Object.values(groupedSubtasks).some((subtaskArray) => subtaskArray.length > 0)
-                                        && <Box
-                                            gap={1}
+                                        &&
+                                        <Box
                                             sx={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                overflowX: 'auto',
-                                                flexWrap: 'nowrap',
+                                                maxHeight: '44vh',
+                                                overflowY: 'auto',
+                                                paddingRight: '16px',
                                             }}
+                                            onScroll={handleSubtasksScroll}
                                         >
-                                            {Object.entries(groupedSubtasks).map(([status, subtasks]) => (
-                                                <Box
-                                                    key={status}
-                                                    onDragOver={handleDragSubtaskOver}
-                                                    onDrop={(e) => handleDropSubtask(e, status)}
-                                                    sx={{
-                                                        padding: 1,
-                                                        margin: 1,
-                                                        border: '1px solid #ccc',
-                                                        borderRadius: '8px',
-                                                        boxShadow: 2,
-                                                        backgroundColor: 'background.paper',
-                                                        minWidth: '150px',
-                                                        minHeight: '150px',
-                                                        flexGrow: 1,
-                                                        flexBasis: 0,
-                                                        '&:hover': {
-                                                            borderColor: 'currentcolor',
-                                                        },
-                                                    }}
-                                                >
-                                                    <Box mb={2}>
-                                                        <Box
-                                                            sx={{
-                                                                marginBottom: '16px',
-                                                                padding: '8px',
-                                                                borderRadius: '4px',
-                                                                textAlign: 'center',
-                                                            }}
-                                                        >
-                                                            <h3
-                                                                style={{
-                                                                    margin: 0,
-                                                                    color: '#333',
-                                                                    fontWeight: '500',
+                                            <Box
+                                                gap={0.3}
+                                                sx={{
+                                                    display: 'flex',
+                                                    flexDirection: 'row',
+                                                    flexWrap: 'nowrap',
+                                                }}
+                                            >
+                                                {Object.entries(groupedSubtasks).map(([status, subtasks]) => (
+                                                    <Box
+                                                        key={status}
+                                                        onDragOver={handleDragSubtaskOver}
+                                                        onDrop={(e) => handleDropSubtask(e, status)}
+                                                        sx={{
+                                                            padding: 0,
+                                                            margin: 0,
+                                                            backgroundColor: 'grey.100',
+                                                            minWidth: '150px',
+                                                            flexGrow: 1,
+                                                            flexBasis: 0,
+                                                            '&:hover': {
+                                                                borderColor: 'currentcolor',
+                                                            },
+                                                        }}
+                                                    >
+                                                        <Box sx={{
+                                                            height: '100%',
+                                                        }}>
+                                                            <Box
+                                                                className="status-header"
+                                                                sx={{
+                                                                    padding: '6px',
+                                                                    textAlign: 'center',
+                                                                    position: 'sticky',
+                                                                    top: 0,
+                                                                    zIndex: 1,
+                                                                    backgroundColor: 'grey.100',
+                                                                    transition: 'box-shadow 0.3s ease',
+                                                                    borderBottom: !isSubtasksAtScrollTop ? '1px solid #ccc' : 'none',
                                                                 }}
                                                             >
-                                                                {status}
-                                                            </h3>
+                                                                <h3
+                                                                    style={{
+                                                                        margin: 0,
+                                                                        fontWeight: '500',
+                                                                        fontSize: '1rem',
+                                                                    }}
+                                                                >
+                                                                    {status}
+                                                                </h3>
+                                                            </Box>
+                                                            <Box
+                                                                sx={{
+                                                                    minHeight: '300px',
+                                                                    padding: 0.3,
+                                                                    paddingBottom: 0,
+                                                                    paddingTop: 0,
+                                                                }}
+                                                            >
+                                                                <SubtaskCard taskId={selectedTask?._id as string} subtasks={subtasks} onSubtaskClick={handleSubtaskClick} draggedSubtaskStatus={status} onSubtaskDragStart={handleDragSubtaskStart} />
+                                                            </Box>
                                                         </Box>
-                                                        <SubtaskCard taskId={selectedTask?._id as string} subtasks={subtasks} onSubtaskClick={handleSubtaskClick} draggedSubtaskStatus={status} onSubtaskDragStart={handleDragSubtaskStart} />
                                                     </Box>
-                                                </Box>
-                                            ))}
-                                        </Box>}
-
+                                                ))}
+                                            </Box>
+                                        </Box>
+                                    }
                                 </Box>
                             </Box>
                         )}

@@ -32,7 +32,7 @@ const MainLayout: React.FC = () => {
             </Box>
         </AppStateProvider>
     ) : (
-        <Navigate to="/home" />
+        <Navigate to="/login" />
     );
 };
 

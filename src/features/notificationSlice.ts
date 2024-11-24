@@ -11,6 +11,7 @@ interface NotificationState {
     loading: boolean;
     error: string | null;
     success: string | null;
+    unSeenNotifications: number;
     totalNotifications: number;
     totalPages: number;
     hasMoreNotifications: boolean;
@@ -24,6 +25,7 @@ const initialState: NotificationState = {
     loading: false,
     error: null,
     success: null,
+    unSeenNotifications: 0,
     totalNotifications: 0,
     totalPages: 0,
     hasMoreNotifications: true,
@@ -42,6 +44,18 @@ export const fetchAllNotifications = createAsyncThunk(
             return data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching notifications');
+        }
+    }
+);
+// Fetch unseen notifications count
+export const fetchUnSeenNotificationsCount = createAsyncThunk(
+    'notifications/fetchUnSeenNotificationsCount',
+    async (_, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.get(`${BASE_URL}/unseen`);
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Error fetching unseen notifications count');
         }
     }
 );
@@ -67,8 +81,6 @@ export const markNotificationAsUnread = createAsyncThunk(
             const { data } = await axiosInstance.patch(`${BASE_URL}/${notificationId}/unread`);
             return data;
         } catch (error: any) {
-            console.log({ error });
-
             return rejectWithValue(error.response?.data?.message || 'Error marking notification as unread');
         }
     }
@@ -124,6 +136,7 @@ const notificationSlice = createSlice({
         },
         addNewNotification: (state, action: PayloadAction<Notification>) => {
             state.notifications = [action.payload, ...state.notifications];
+            state.unSeenNotifications = state.unSeenNotifications + 1 
         },
         resetNotifications: (state) => {
             state.notifications = [];
@@ -139,24 +152,18 @@ const notificationSlice = createSlice({
                 state.loading = true;
             })
             .addCase(fetchAllNotifications.fulfilled, (state, action: PayloadAction<any>) => {
-                console.log("----");
-
                 if (isRead === undefined) {
-                    // console.log("is read not given");
                     if (action.payload.notifications.length > 0) {
                         state.hasMoreNotifications = true
                         state.notifications = [...state.notifications, ...action.payload.notifications];
-                        // console.log({ notifications: state.notifications });
                     } else {
                         state.hasMoreNotifications = false
                     }
                     state.loading = false;
                 } else if (isRead === false) {
                     if (action.payload.notifications.length > 0) {
-                        // console.log("is read given");
                         state.hasMoreUnreadNotifications = true
                         state.unReadNotifications = [...state.unReadNotifications, ...action.payload.notifications];
-                        // console.log({ unReadNotifications: state.unReadNotifications });
                     } else {
                         state.hasMoreUnreadNotifications = false
                     }
@@ -164,10 +171,22 @@ const notificationSlice = createSlice({
                 }
                 // state.totalNotifications = action.payload.totalNotifications;
                 // state.totalPages = action.payload.totalPages;
-
                 // state.notifications = action.payload.notifications;
             })
             .addCase(fetchAllNotifications.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // fetch unseen notifications count
+            .addCase(fetchUnSeenNotificationsCount.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchUnSeenNotificationsCount.fulfilled, (state, action: PayloadAction<any>) => {
+                state.unSeenNotifications = action.payload.count;
+                state.loading = false;
+            })
+            .addCase(fetchUnSeenNotificationsCount.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.error = action.payload;
             })
@@ -228,6 +247,7 @@ const notificationSlice = createSlice({
             .addCase(markAllNotificationsAsSeen.fulfilled, (state, action: PayloadAction<any>) => {
                 // state.notifications = action.payload.updatedNotifications;
                 // state.success = action.payload.message;
+                state.unSeenNotifications = 0
                 state.loading = false;
             })
             .addCase(markAllNotificationsAsSeen.rejected, (state, action: PayloadAction<any>) => {
@@ -257,5 +277,6 @@ export const { addNewNotification, resetNotifications, resetUnReadNotifications,
 
 export const selectAllNotifications = (state: RootState) => state.notifications.notifications;
 export const selectUnReadNotifications = (state: RootState) => state.notifications.unReadNotifications;
+export const selectUnSeenNotifications = (state: RootState) => state.notifications.unSeenNotifications;
 
 export default notificationSlice.reducer;

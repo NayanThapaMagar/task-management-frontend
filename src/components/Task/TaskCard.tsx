@@ -45,7 +45,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ tasks, onTaskClick, draggedTaskStat
             },
             '&:active': {
               cursor: 'grabbing',
-              opacity: 0.9,
+              opacity: 0.95,
               boxShadow: 5,
             },
           }}

@@ -33,14 +33,14 @@ axiosInstance.interceptors.response.use(
             // Handle specific status codes globally
             const { status } = error.response;
             if (status === 401) {
-                console.error('Unauthorized - Redirecting to login');
+                // console.error('Unauthorized - Redirecting to login');
                 // Optional: Redirect to login page, clear token, etc.
                 localStorage.removeItem('token'); // Clear invalid token
                 window.location.href = '/login';  // Redirect user to login page
             } else if (status === 403) {
-                console.error('Forbidden - Insufficient permissions');
+                // console.error('Forbidden - Insufficient permissions');
                 // Optional: Handle insufficient permissions, show alert, etc.
-                alert('You do not have permission to perform this action');
+                // alert('You do not have permission to perform this action');
             } else {
                 // Handle other status codes as needed
                 // console.error('Error:', error.response.data.message || 'An error occurred');

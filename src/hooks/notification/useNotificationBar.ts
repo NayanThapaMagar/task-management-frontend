@@ -7,7 +7,7 @@ import { setSelectedTask } from "../../features/taskSlice";
 import { setSelectedSubtask } from "../../features/subtaskSlice";
 import { useNavigate } from "react-router-dom";
 
-const useNotificationBar = (notifications: Notification[], closeNotificationBar: () => void) => {
+const useNotificationBar = (closeNotificationBar?: () => void) => {
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
 
@@ -22,32 +22,15 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
     const [unReadNotificationsPage, setUnReadNotificationsPage] = useState(1);
 
 
-    const fetchNotificationsAtMount = async () => {
-        await dispatch(fetchAllNotifications({ isRead: false, page: 1, limit: 20 }));
-        await dispatch(fetchAllNotifications({ page: 1, limit: 20 }));
-    }
     const fetchNotifications = async () => {
         if (showUnread && hasMoreUnreadNotifications) {
-            console.log(`Fetching ${unReadNotificationsPage > 1 ? 'more' : ''} unread notifications at page ${unReadNotificationsPage}`);
+            // console.log(`Fetching ${unReadNotificationsPage > 1 ? 'more' : ''} unread notifications at page ${unReadNotificationsPage}`);
             await dispatch(fetchAllNotifications({ isRead: false, page: unReadNotificationsPage, limit: 20 }));
-            console.log("hasMoreUnreadNotifications:", hasMoreUnreadNotifications);
         } else if (!showUnread && hasMoreNotifications) {
-            console.log(`Fetching ${notificationsPage > 1 ? 'more' : ''} notifications at page ${notificationsPage}`);
+            // console.log(`Fetching ${notificationsPage > 1 ? 'more' : ''} notifications at page ${notificationsPage}`);
             await dispatch(fetchAllNotifications({ page: notificationsPage, limit: 20 }));
-            console.log("hasMoreNotifications:", hasMoreNotifications);
         }
     };
-
-    useEffect(() => {
-        dispatch(resetNotifications())
-        dispatch(resetUnReadNotifications())
-        fetchNotificationsAtMount()
-        return () => {
-            console.log('unmount');
-            dispatch(resetNotifications())
-            dispatch(resetUnReadNotifications())
-        }
-    }, []);
 
     useEffect(() => {
         // fetching more NOTIFICATIOINS if any
@@ -57,7 +40,6 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
     }, [notificationsPage, unReadNotificationsPage]);
 
     const filteredNotifications = showUnread ? unReadNotifications : allNotifications;
-    // ? notifications.filter((notification) => !notification.isRead)
 
     const markAsRead = async (notificationId: string) => {
         await dispatch(markNotificationAsRead(notificationId))
@@ -69,11 +51,16 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
         handleMenuClose()
         await dispatch(markAllNotificationsAsRead({ page: 1, limit: 20 }))
     };
+    const handleOpenNotifications = async () => {
+        handleMenuClose();
+        closeNotificationBar?.();
+        navigate('/notifications');
+    };
     const handleDeleteNotification = async (notificationId: string) => {
         await dispatch(deleteNotification(notificationId))
     };
     const handleNotificationClick = async (notification: Notification) => {
-        closeNotificationBar()
+        closeNotificationBar?.()
         if (notification.taskId && !notification.subtaskId) {
             await dispatch(markNotificationAsRead(notification._id))
             dispatch(setSelectedTask(notification.taskId as Task))
@@ -96,15 +83,7 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
     const handleScroll = async (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
         const scrollContainer = e.currentTarget;
 
-        console.log('scrolling at bottom....', scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight);
-        // // // console.log("scrollTop:", scrollContainer.scrollTop);
-        // // // console.log("clientHeight:", scrollContainer.clientHeight);
-        // // // console.log("scrollHeight:", scrollContainer.scrollHeight);
-        // // console.log("hasMoreNotifications:", hasMoreNotifications);
-
-        // console.log({ hasMoreNotifications });
-        // console.log({ hasMoreUnreadNotifications });
-
+        // console.log('scrolling at notifications bottom....', scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight);
 
         if (!loading && !showUnread && hasMoreNotifications && (scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight)) {
             setNotificationsPage((prev) => prev + 1);
@@ -125,13 +104,13 @@ const useNotificationBar = (notifications: Notification[], closeNotificationBar:
         markAsRead,
         markAsUnread,
         markAllAsRead,
+        handleOpenNotifications,
         handleDeleteNotification,
         handleNotificationClick,
         filteredNotifications,
         toggleMenu,
         handleScroll,
         handleMenuClose,
-        navigate,
     }
 }
 

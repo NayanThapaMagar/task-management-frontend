@@ -16,6 +16,15 @@ interface SubtaskState {
     totalSubtasks: number;
     totalPages: number;
     selectedSubtask: SubTask | null;
+    hasMoreAllToDoSubtasks: boolean;
+    hasMoreAllPendingSubtasks: boolean;
+    hasMoreAllCompletedSubtasks: boolean;
+    hasMoreMyToDoSubtasks: boolean;
+    hasMoreMyPendingSubtasks: boolean;
+    hasMoreMyCompletedSubtasks: boolean;
+    hasMoreAssignedToDoSubtasks: boolean;
+    hasMoreAssignedPendingSubtasks: boolean;
+    hasMoreAssignedCompletedSubtasks: boolean;
     hasMoreComments: boolean;
 }
 
@@ -31,6 +40,15 @@ const initialState: SubtaskState = {
     totalSubtasks: 0,
     totalPages: 0,
     selectedSubtask: null,
+    hasMoreAllToDoSubtasks: true,
+    hasMoreAllPendingSubtasks: true,
+    hasMoreAllCompletedSubtasks: true,
+    hasMoreMyToDoSubtasks: true,
+    hasMoreMyPendingSubtasks: true,
+    hasMoreMyCompletedSubtasks: true,
+    hasMoreAssignedToDoSubtasks: true,
+    hasMoreAssignedPendingSubtasks: true,
+    hasMoreAssignedCompletedSubtasks: true,
     hasMoreComments: true,
 };
 
@@ -40,7 +58,7 @@ export const fetchAllSubtasks = createAsyncThunk(
     async ({ taskId, params }: { taskId: string, params: { page: number; limit: number; status?: string; priority?: string } }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}`, { params });
-            return data;
+            return { data, status: params.status };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching subtasks');
         }
@@ -52,7 +70,7 @@ export const fetchMySubtasks = createAsyncThunk(
     async ({ taskId, params }: { taskId: string, params: { page: number; limit: number; status?: string; priority?: string } }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/my-subtasks`, { params });
-            return data;
+            return { data, status: params.status };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching assigned subtasks');
         }
@@ -63,7 +81,7 @@ export const fetchAssignedSubtasks = createAsyncThunk(
     async ({ taskId, params }: { taskId: string, params: { page: number; limit: number; status?: string; priority?: string } }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.get(`${BASE_URL}/${taskId}/assigned-subtasks`, { params });
-            return data;
+            return { data, status: params.status };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching assigned subtasks');
         }
@@ -193,14 +211,34 @@ const subtaskSlice = createSlice({
         setError(state, action: PayloadAction<string>) {
             state.error = action.payload;
         },
-        resetComments: (state) => {
-            state.comments = [];
+        resetSubtasks: (state) => {
+            state.subtasks = [];
+        },
+        resetMySubtasks: (state) => {
+            state.mySubtasks = [];
+        },
+        resetAssignedSubtasks: (state) => {
+            state.assignedSubtasks = [];
+        },
+        resetSubtaskAvailabilityIndicator: (state) => {
+            state.hasMoreAllToDoSubtasks = true;
+            state.hasMoreAllPendingSubtasks = true;
+            state.hasMoreAllCompletedSubtasks = true;
+            state.hasMoreMyToDoSubtasks = true;
+            state.hasMoreMyPendingSubtasks = true;
+            state.hasMoreMyCompletedSubtasks = true;
+            state.hasMoreAssignedToDoSubtasks = true;
+            state.hasMoreAssignedPendingSubtasks = true;
+            state.hasMoreAssignedCompletedSubtasks = true;
         },
         setSelectedSubtask: (state, action: PayloadAction<SubTask>) => {
             state.selectedSubtask = action.payload;
         },
         resetSelectedSubtask: (state) => {
             state.selectedSubtask = null;
+        },
+        resetComments: (state) => {
+            state.comments = [];
         },
     },
     extraReducers: (builder) => {
@@ -211,7 +249,17 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchAllSubtasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.subtasks = [...state.subtasks, ...action.payload.subtasks];
+                if (action.payload.data.subtasks.length !== 0) {
+                    state.subtasks = [...state.subtasks, ...action.payload.data.subtasks];
+                } else {
+                    if (action.payload.status === 'to do') {
+                        state.hasMoreAllToDoSubtasks = false;
+                    } else if (action.payload.status === 'pending') {
+                        state.hasMoreAllPendingSubtasks = false;
+                    } if (action.payload.status === 'completed') {
+                        state.hasMoreAllCompletedSubtasks = false;
+                    }
+                }
                 // state.subtasks = action.payload.subtasks;
             })
             .addCase(fetchAllSubtasks.rejected, (state, action: PayloadAction<any>) => {
@@ -225,7 +273,17 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchMySubtasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.mySubtasks = [...state.mySubtasks, ...action.payload.subtasks];
+                if (action.payload.data.subtasks.length !== 0) {
+                    state.mySubtasks = [...state.mySubtasks, ...action.payload.data.subtasks];
+                } else {
+                    if (action.payload.status === 'to do') {
+                        state.hasMoreMyToDoSubtasks = false;
+                    } else if (action.payload.status === 'pending') {
+                        state.hasMoreMyPendingSubtasks = false;
+                    } if (action.payload.status === 'completed') {
+                        state.hasMoreMyCompletedSubtasks = false;
+                    }
+                }
                 // state.mySubtasks = action.payload.subtasks;
             })
             .addCase(fetchMySubtasks.rejected, (state, action: PayloadAction<any>) => {
@@ -239,7 +297,17 @@ const subtaskSlice = createSlice({
             })
             .addCase(fetchAssignedSubtasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.assignedSubtasks = [...state.assignedSubtasks, ...action.payload.subtasks];
+                if (action.payload.data.subtasks.length !== 0) {
+                    state.assignedSubtasks = [...state.assignedSubtasks, ...action.payload.data.subtasks];
+                } else {
+                    if (action.payload.status === 'to do') {
+                        state.hasMoreAssignedToDoSubtasks = false;
+                    } else if (action.payload.status === 'pending') {
+                        state.hasMoreAssignedPendingSubtasks = false;
+                    } if (action.payload.status === 'completed') {
+                        state.hasMoreAssignedCompletedSubtasks = false;
+                    }
+                }
                 // state.assignedSubtasks = action.payload.subtasks;
             })
             .addCase(fetchAssignedSubtasks.rejected, (state, action: PayloadAction<any>) => {
@@ -403,7 +471,6 @@ const subtaskSlice = createSlice({
     },
 });
 
-export const { resetMessages, resetComments, setError, setSelectedSubtask, resetSelectedSubtask } = subtaskSlice.actions;
 
 // Selectors
 export const selectAllSubtasks = (state: RootState) => state.subtasks.subtasks;
@@ -412,4 +479,6 @@ export const selectAssignedSubtasks = (state: RootState) => state.subtasks.assig
 
 export const selectAllSubtaskComments = (state: RootState) => state.subtasks.comments;
 
+// Actions and reducer export
+export const { resetSubtasks, resetMySubtasks, resetAssignedSubtasks, resetSubtaskAvailabilityIndicator, resetComments, resetMessages, setError, setSelectedSubtask, resetSelectedSubtask } = subtaskSlice.actions;
 export default subtaskSlice.reducer;

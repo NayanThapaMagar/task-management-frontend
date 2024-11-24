@@ -1,10 +1,13 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+
+// import Dashboard from './pages/Dashboard';
+import UnderConstructionDashboard from './components/Dashboard/DashboardUnderConstruction';
 import Home from './pages/Home';
-import Notification from './pages/Notifications';
+import Notifications from './pages/Notifications';
 
 import Task from './pages/Task/TaskList';
 import AddTask from './pages/Task/AddTask';
@@ -23,16 +26,20 @@ const App: React.FC = () => {
             <Routes>
                 {/* main layout renders only if user is logged in */}
                 <Route element={<MainLayout />}>
-                    <Route path="/" element={<Dashboard />} />
+                    {/* <Route path="/" element={<Dashboard />} /> */}
+                    <Route path="/" element={<UnderConstructionDashboard />} />
+
+                    <Route path="/notifications" element={<Notifications />} />
+
                     <Route path="/tasks" element={<Task />} />
                     <Route path="/tasks/addTask" element={<AddTask />} />
                     <Route path="/tasks/taskDetail" element={<TaskDetail />} />
                     <Route path="/tasks/addSubtask" element={<AddSubtask />} />
                     <Route path="/tasks/subtaskDetail" element={<SubtaskDetail />} />
-    
+
+
                     <Route path="/userConnection" element={<UserConnection />} />
 
-                    <Route path="/notifications" element={<Notification />} />
                 </Route>
 
                 <Route element={<AuthLayout />}>
@@ -41,7 +48,7 @@ const App: React.FC = () => {
                 </Route>
 
                 <Route element={<PublicLayout />}>
-                    <Route path="/home" element={<Home />} /> 
+                    <Route path="/home" element={<Home />} />
                 </Route>
 
             </Routes>

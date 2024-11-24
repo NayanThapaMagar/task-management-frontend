@@ -16,7 +16,15 @@ interface TaskState {
     totalTasks: number;
     totalPages: number;
     selectedTask: Task | null;
-    hasMoreTasks: boolean;
+    hasMoreAllToDoTasks: boolean;
+    hasMoreAllPendingTasks: boolean;
+    hasMoreAllCompletedTasks: boolean;
+    hasMoreMyToDoTasks: boolean;
+    hasMoreMyPendingTasks: boolean;
+    hasMoreMyCompletedTasks: boolean;
+    hasMoreAssignedToDoTasks: boolean;
+    hasMoreAssignedPendingTasks: boolean;
+    hasMoreAssignedCompletedTasks: boolean;
     hasMoreComments: boolean;
 }
 
@@ -32,7 +40,15 @@ const initialState: TaskState = {
     totalTasks: 0,
     totalPages: 0,
     selectedTask: null,
-    hasMoreTasks: true,
+    hasMoreAllToDoTasks: true,
+    hasMoreAllPendingTasks: true,
+    hasMoreAllCompletedTasks: true,
+    hasMoreMyToDoTasks: true,
+    hasMoreMyPendingTasks: true,
+    hasMoreMyCompletedTasks: true,
+    hasMoreAssignedToDoTasks: true,
+    hasMoreAssignedPendingTasks: true,
+    hasMoreAssignedCompletedTasks: true,
     hasMoreComments: true,
 };
 
@@ -42,7 +58,7 @@ export const fetchAllTasks = createAsyncThunk(
     async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.get(`${BASE_URL}`, { params });
-            return data;
+            return { data, status: params.status };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching tasks');
         }
@@ -54,7 +70,7 @@ export const fetchMyTasks = createAsyncThunk(
     async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.get(`${BASE_URL}/my-tasks`, { params });
-            return data;
+            return { data, status: params.status };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching my tasks');
         }
@@ -66,7 +82,7 @@ export const fetchAssignedTasks = createAsyncThunk(
     async (params: { page: number; limit: number; status?: string; priority?: string }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.get(`${BASE_URL}/assigned-tasks`, { params });
-            return data;
+            return { data, status: params.status };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching assigned tasks');
         }
@@ -199,17 +215,31 @@ const taskSlice = createSlice({
         resetTasks: (state) => {
             state.tasks = [];
         },
-        resetComments: (state) => {
-            state.comments = [];
+        resetMyTasks: (state) => {
+            state.myTasks = [];
         },
-        setAssignedTasks: (state, action: PayloadAction<Task[]>) => {
-            state.assignedTasks = action.payload;
+        resetAssignedTasks: (state) => {
+            state.assignedTasks = [];
+        },
+        resetTaskAvailabilityIndicator: (state) => {
+            state.hasMoreAllToDoTasks = true;
+            state.hasMoreAllPendingTasks = true;
+            state.hasMoreAllCompletedTasks = true;
+            state.hasMoreMyToDoTasks = true;
+            state.hasMoreMyPendingTasks = true;
+            state.hasMoreMyCompletedTasks = true;
+            state.hasMoreAssignedToDoTasks = true;
+            state.hasMoreAssignedPendingTasks = true;
+            state.hasMoreAssignedCompletedTasks = true;
         },
         setSelectedTask: (state, action: PayloadAction<Task>) => {
             state.selectedTask = action.payload;
         },
         resetSelectedTask: (state) => {
             state.selectedTask = null;
+        },
+        resetComments: (state) => {
+            state.comments = [];
         },
     },
     extraReducers: (builder) => {
@@ -220,14 +250,16 @@ const taskSlice = createSlice({
             })
             .addCase(fetchAllTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                if (action.payload.tasks.length !== 0) {
-                    console.log(action.payload.tasks.length);
-
-                    state.tasks = [...state.tasks, ...action.payload.tasks];
+                if (action.payload.data.tasks.length !== 0) {
+                    state.tasks = [...state.tasks, ...action.payload.data.tasks];
                 } else {
-                    state.hasMoreTasks = false;
-                    console.log(action.payload.tasks.length);
-
+                    if (action.payload.status === 'to do') {
+                        state.hasMoreAllToDoTasks = false;
+                    } else if (action.payload.status === 'pending') {
+                        state.hasMoreAllPendingTasks = false;
+                    } if (action.payload.status === 'completed') {
+                        state.hasMoreAllCompletedTasks = false;
+                    }
                 }
                 // state.tasks = action.payload.tasks;
                 // state.totalTasks = action.payload.totalTasks;
@@ -244,7 +276,17 @@ const taskSlice = createSlice({
             })
             .addCase(fetchMyTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.myTasks = [...state.myTasks, ...action.payload.tasks];
+                if (action.payload.data.tasks.length !== 0) {
+                    state.myTasks = [...state.myTasks, ...action.payload.data.tasks];
+                } else {
+                    if (action.payload.status === 'to do') {
+                        state.hasMoreMyToDoTasks = false;
+                    } else if (action.payload.status === 'pending') {
+                        state.hasMoreMyPendingTasks = false;
+                    } if (action.payload.status === 'completed') {
+                        state.hasMoreMyCompletedTasks = false;
+                    }
+                }
                 // state.myTasks = action.payload.tasks;
                 // state.totalTasks = action.payload.totalTasks;
                 // state.totalPages = action.payload.totalPages;
@@ -260,7 +302,17 @@ const taskSlice = createSlice({
             })
             .addCase(fetchAssignedTasks.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.assignedTasks = [...state.assignedTasks, ...action.payload.tasks];
+                if (action.payload.data.tasks.length !== 0) {
+                    state.assignedTasks = [...state.assignedTasks, ...action.payload.data.tasks];
+                } else {
+                    if (action.payload.status === 'to do') {
+                        state.hasMoreAssignedToDoTasks = false;
+                    } else if (action.payload.status === 'pending') {
+                        state.hasMoreAssignedPendingTasks = false;
+                    } if (action.payload.status === 'completed') {
+                        state.hasMoreAssignedCompletedTasks = false;
+                    }
+                }
                 // state.assignedTasks = action.payload.tasks;
                 // state.totalTasks = action.payload.totalTasks;
                 // state.totalPages = action.payload.totalPages;
@@ -435,5 +487,5 @@ export const selectAssignedTasks = (state: RootState) => state.tasks.assignedTas
 export const selectAllTaskComments = (state: RootState) => state.tasks.comments;
 
 // Actions and reducer export
-export const { resetMessages, resetTasks, resetComments, setSelectedTask, resetSelectedTask, setError } = taskSlice.actions;
+export const { resetTasks, resetMyTasks, resetAssignedTasks, resetTaskAvailabilityIndicator, resetComments, resetMessages, setError, setSelectedTask, resetSelectedTask } = taskSlice.actions;
 export default taskSlice.reducer;

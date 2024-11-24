@@ -42,7 +42,13 @@ const AddTask: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <Box>
+        <Box
+            sx={{
+                overflow: 'auto',
+                maxHeight: 'calc(100vh - 66px)',
+                maxWidth: 'calc(100vw - 57px)',
+            }}
+        >
             <Box sx={{ p: 2, mt: 2 }}>
                 {loading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" height="100px">
@@ -56,32 +62,36 @@ const AddTask: React.FC = () => {
                             <TextField
                                 label="Title"
                                 fullWidth
-                                margin="normal"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
-                                sx={{ maxWidth: '300px' }}
+                                sx={{
+                                    maxWidth: '300px',
+                                    margin: 0,
+                                    padding: 0,
+                                }}
                             />
 
-                            <Box display="flex" flexWrap="wrap" flexDirection="column" gap={2}>
+                            <Box display="flex" flexWrap="wrap" flexDirection="column" gap={1}>
                                 <Box>
                                     <Typography variant="body1" fontWeight="bold" m={1}>Description</Typography>
                                     <ReactQuill
                                         value={description}
                                         onChange={setDescription}
                                         placeholder={'Description'}
-                                        style={{ marginBottom: '3rem', height: '350px' }}
+                                        style={{ marginBottom: '3rem', height: '300px' }}
                                     />
                                 </Box>
 
                                 <Box display="flex" flexWrap="wrap" flexDirection="row" gap={2}>
                                     <Box flex={1} minWidth="200px">
-                                        <FormControl fullWidth margin="normal">
+                                        <FormControl fullWidth margin="none">
                                             <InputLabel shrink>Priority</InputLabel>
                                             <Select
                                                 value={priority}
                                                 onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
                                                 label="Priority"
+
                                             >
                                                 <MenuItem value="low">Low</MenuItem>
                                                 <MenuItem value="medium">Medium</MenuItem>
@@ -91,7 +101,7 @@ const AddTask: React.FC = () => {
                                     </Box>
 
                                     <Box flex={1} minWidth="200px">
-                                        <FormControl fullWidth margin="normal">
+                                        <FormControl fullWidth margin="none">
                                             <InputLabel>Assign To</InputLabel>
                                             <Select
                                                 multiple

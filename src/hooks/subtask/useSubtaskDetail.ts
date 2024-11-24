@@ -122,7 +122,9 @@ const useSubtaskDetail = () => {
     const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
         const scrollContainer = e.currentTarget;
 
-        if (!loading && hasMoreComments && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
+        // console.log('Scrolling at subtasks comments botom:', scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight);
+
+        if (!loading && hasMoreComments && scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight) {
             setCommentPage((prev) => prev + 1);
         }
     };

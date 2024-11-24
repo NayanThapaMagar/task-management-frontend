@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectAllTaskComments, updateTask, fetchAllTaskComments, resetSelectedTask, resetComments, setError, resetMessages as resetTaskMessages } from "../../features/taskSlice";
-import { selectAllSubtasks, selectMySubtasks, selectAssignedSubtasks, fetchAllSubtasks, fetchMySubtasks, fetchAssignedSubtasks, updateSubtaskStatus, setSelectedSubtask, resetMessages as resetSubtaskMessages } from '../../features/subtaskSlice';
+import { selectAllSubtasks, selectMySubtasks, selectAssignedSubtasks, fetchAllSubtasks, fetchMySubtasks, fetchAssignedSubtasks, updateSubtaskStatus, setSelectedSubtask, resetMessages as resetSubtaskMessages, resetSubtasks, resetMySubtasks, resetAssignedSubtasks, resetSubtaskAvailabilityIndicator } from '../../features/subtaskSlice';
 import { selectAllConnections, fetchUserConnections } from "../../features/userConnectionSlice";
 import { AppDispatch, RootState } from "../../store";
 import htmlToMarkdown from "@wcj/html-to-markdown";
@@ -26,6 +26,15 @@ const useTaskDetail = () => {
         loading: subtaskLoading,
         error: subtaskError,
         success: subtaskSuccess,
+        hasMoreAllToDoSubtasks,
+        hasMoreAllPendingSubtasks,
+        hasMoreAllCompletedSubtasks,
+        hasMoreMyToDoSubtasks,
+        hasMoreMyPendingSubtasks,
+        hasMoreMyCompletedSubtasks,
+        hasMoreAssignedToDoSubtasks,
+        hasMoreAssignedPendingSubtasks,
+        hasMoreAssignedCompletedSubtasks,
     } = useSelector((state: RootState) => state.subtasks);
 
     const loading = taskLoading || subtaskLoading;
@@ -37,6 +46,7 @@ const useTaskDetail = () => {
     const allTaskComments = useSelector(selectAllTaskComments);
 
     const [openSnackbar, setOpenSnackbar] = useState(false);
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('low');
@@ -54,13 +64,22 @@ const useTaskDetail = () => {
     const [commentPage, setCommentPage] = useState(1);
 
     // subtask
+
     const allSubtasks = useSelector(selectAllSubtasks);
     const mySubtasks = useSelector(selectMySubtasks);
     const assignedSubtasks = useSelector(selectAssignedSubtasks);
 
-    const [listSubtasks, setListSubtasks] = useState<SubtaskType[]>([]);
     const [subtaskPriorityFilter, setSubtaskPriorityFilter] = useState('all');
     const [subtaskCategory, setSubtaskCategory] = useState('all');
+
+
+    const [isSubtasksAtScrollTop, setIsSubtasksAtScrollTop] = useState(true);
+
+    const [allSubtasksPage, setAllSubtasksPage] = useState(1);
+    const [mySubtasksPage, setMySubtasksPage] = useState(1);
+    const [assignedSubtasksPage, setAssignedSubtasksPage] = useState(1);
+
+    const [listSubtasks, setListSubtasks] = useState<SubtaskType[]>([]);
 
     const [draggedSubtask, setDraggedSubtask] = useState<{ subtask: SubtaskType; currentStatus: string } | null>(null);
 
@@ -110,24 +129,77 @@ const useTaskDetail = () => {
 
     // Subtasks
 
-    const fetchSubtasks = async () => {
-        if (selectedTask) {
-            const query: Record<string, string> = {};
-            if (subtaskPriorityFilter !== 'all') query.priority = subtaskPriorityFilter;
+    const fetchSubtasksAtFirstPage = async () => {
+        const query: Record<string, string> = {};
+        if (subtaskPriorityFilter !== 'all') query.priority = subtaskPriorityFilter;
 
-            if (subtaskCategory === 'all') {
-                await dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 20 } }));
-            } else if (subtaskCategory === 'myTasks') {
-                await dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 20 } }));
-            } else if (subtaskCategory === 'assignedTasks') {
-                await dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, page: 1, limit: 20 } }));
-            }
+        // console.log(`Fetching ${allSubtasksPage !== 1 ? 'more' : ''} all subtasks at page ${allSubtasksPage}`);
+
+        dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'to do', page: 1, limit: 5 } }));
+        dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'pending', page: 1, limit: 5 } }));
+        dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'completed', page: 1, limit: 5 } }));
+
+        // console.log(`Fetching ${mySubtasksPage !== 1 ? 'more' : ''} mysubtasks at page ${mySubtasksPage}`);
+
+        dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'to do', page: 1, limit: 5 } }));
+        dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'pending', page: 1, limit: 5 } }));
+        dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'completed', page: 1, limit: 5 } }));
+
+        // console.log(`Fetching ${assignedSubtasksPage !== 1 ? 'more' : ''} assignedsubtasks at page ${assignedSubtasksPage}`);
+
+        dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'to do', page: 1, limit: 5 } }));
+        dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'pending', page: 1, limit: 5 } }));
+        dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'completed', page: 1, limit: 5 } }));
+
+    };
+    const fetchMoreSubtasks = async () => {
+        const query: Record<string, string> = {};
+        if (subtaskPriorityFilter !== 'all') query.priority = subtaskPriorityFilter;
+
+        if (subtaskCategory === 'all') {
+            // console.log(`Fetching ${allSubtasksPage !== 1 ? 'more' : ''} allsubtasks at page ${allSubtasksPage}`);
+
+            hasMoreAllToDoSubtasks && dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'to do', page: allSubtasksPage, limit: 5 } }));
+            hasMoreAllPendingSubtasks && dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'pending', page: allSubtasksPage, limit: 5 } }));
+            hasMoreAllCompletedSubtasks && dispatch(fetchAllSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'completed', page: allSubtasksPage, limit: 5 } }));
+        } else if (subtaskCategory === 'myTasks') {
+            // console.log(`Fetching ${mySubtasksPage !== 1 ? 'more' : ''} mysubtasks at page ${mySubtasksPage}`);
+
+            hasMoreMyToDoSubtasks && dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'to do', page: mySubtasksPage, limit: 5 } }));
+            hasMoreMyPendingSubtasks && dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'pending', page: mySubtasksPage, limit: 5 } }));
+            hasMoreMyCompletedSubtasks && dispatch(fetchMySubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'completed', page: mySubtasksPage, limit: 5 } }));
+        } else if (subtaskCategory === 'assignedTasks') {
+            // console.log(`Fetching ${assignedSubtasksPage !== 1 ? 'more' : ''} assignedsubtasks at page ${assignedSubtasksPage}`);
+
+            hasMoreAssignedToDoSubtasks && dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'to do', page: assignedSubtasksPage, limit: 5 } }));
+            hasMoreAssignedPendingSubtasks && dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'pending', page: assignedSubtasksPage, limit: 5 } }));
+            hasMoreAssignedCompletedSubtasks && dispatch(fetchAssignedSubtasks({ taskId: selectedTask!._id, params: { ...query, status: 'completed', page: assignedSubtasksPage, limit: 5 } }));
         }
     };
 
     useEffect(() => {
-        fetchSubtasks();
-    }, [subtaskPriorityFilter, subtaskCategory, selectedTask, dispatch]);
+        // fetching more task if any
+        if (allSubtasksPage > 1 || mySubtasksPage > 1 || assignedSubtasksPage > 1) {
+            fetchMoreSubtasks();
+        }
+    }, [allSubtasksPage, mySubtasksPage, assignedSubtasksPage]);
+
+    useEffect(() => {
+        setAllSubtasksPage(1)
+        setMySubtasksPage(1)
+        setAssignedSubtasksPage(1)
+        dispatch(resetSubtasks())
+        dispatch(resetMySubtasks())
+        dispatch(resetAssignedSubtasks())
+        dispatch(resetSubtaskAvailabilityIndicator())
+
+        fetchSubtasksAtFirstPage();
+        return () => {
+            dispatch(resetSubtasks())
+            dispatch(resetMySubtasks())
+            dispatch(resetAssignedSubtasks())
+        }
+    }, [subtaskPriorityFilter, selectedTask]);
 
     useEffect(() => {
         const subtasks = subtaskCategory === 'all' ? allSubtasks : subtaskCategory === 'myTasks' ? mySubtasks : assignedSubtasks;
@@ -174,6 +246,16 @@ const useTaskDetail = () => {
         setEditMode((prev) => ({ ...prev, [field]: true }));
     };
 
+    const handleCommentsScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+        const scrollContainer = e.currentTarget;
+
+        // console.log('Scrolling at comments botom:', scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight);
+
+        if (!loading && hasMoreComments && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
+            setCommentPage((prev) => prev + 1);
+        }
+    };
+
 
     // Subtasks
 
@@ -208,15 +290,25 @@ const useTaskDetail = () => {
         setDraggedSubtask(null);
     };
 
-
-    //-----//
-    const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const handleSubtasksScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
         const scrollContainer = e.currentTarget;
 
-        if (!loading && hasMoreComments && scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
-            setCommentPage((prev) => prev + 1);
+        setIsSubtasksAtScrollTop(scrollContainer.scrollTop === 0)
+
+        // console.log('Scrolling at subtasks botom:', scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight);
+
+        if (!loading && subtaskCategory === 'all' && (hasMoreAllToDoSubtasks || hasMoreAllPendingSubtasks || hasMoreAllCompletedSubtasks) && scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight) {
+            setAllSubtasksPage((prev) => prev + 1);
+        }
+        if (!loading && subtaskCategory === 'myTasks' && (hasMoreMyToDoSubtasks || hasMoreMyPendingSubtasks || hasMoreMyCompletedSubtasks) && scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight) {
+            setMySubtasksPage((prev) => prev + 1);
+        }
+        if (!loading && subtaskCategory === 'assignedTasks' && (hasMoreAssignedToDoSubtasks || hasMoreAssignedPendingSubtasks || hasMoreAssignedCompletedSubtasks) && scrollContainer.scrollTop + scrollContainer.clientHeight + 1 >= scrollContainer.scrollHeight) {
+            setAssignedSubtasksPage((prev) => prev + 1);
         }
     };
+
+    //-----//
 
     const handleClose = () => {
         dispatch(resetSelectedTask());
@@ -267,7 +359,9 @@ const useTaskDetail = () => {
         handleDragSubtaskStart,
         handleDragSubtaskOver,
         handleDropSubtask,
-        handleScroll,
+        isSubtasksAtScrollTop,
+        handleSubtasksScroll,
+        handleCommentsScroll,
         handleClose,
         loading,
         success,

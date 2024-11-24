@@ -31,19 +31,12 @@ const SubtaskCard: React.FC<SubtaskCardProps> = ({ taskId, subtasks, onSubtaskCl
           key={subtask._id}
           draggable
           onDragStart={(e) => onSubtaskDragStart(e, subtask, draggedSubtaskStatus)}
-          border={1}
-          borderColor="grey.300"
-          borderRadius={2}
-          padding={2}
-          marginBottom={2}
           onClick={() => onSubtaskClick(subtask)}
           sx={{
             cursor: 'pointer',
-            padding: 2,
-            marginBottom: 2,
+            padding: 1,
+            marginBottom: 0.3,
             border: '1px solid #ccc',
-            borderRadius: '8px',
-            boxShadow: 1,
             backgroundColor: 'background.paper',
             transition: 'transform 0.1s, opacity 0.1s',
             '&:hover': {
@@ -64,7 +57,11 @@ const SubtaskCard: React.FC<SubtaskCardProps> = ({ taskId, subtasks, onSubtaskCl
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <Typography variant="h6">{subtask.title}</Typography>
+            <Typography sx={{
+              flexGrow: 1,
+              fontWeight: '500',
+              fontSize: '1rem',
+            }}>{subtask.title}</Typography>
             <IconButton
               aria-label="more"
               aria-controls="long-menu"
@@ -86,7 +83,10 @@ const SubtaskCard: React.FC<SubtaskCardProps> = ({ taskId, subtasks, onSubtaskCl
               <MenuItem onClick={() => handleDeleteSubtask(taskId)}>Delete</MenuItem>
             </Menu>
           </Box>
-          <Typography variant="body1">
+          <Typography sx={{
+            fontWeight: '500',
+            fontSize: '0.8rem',
+          }}>
             Priority:
             <span
               style={{

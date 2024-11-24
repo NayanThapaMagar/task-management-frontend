@@ -14,21 +14,21 @@ export const initializeSocket = (token: string): Socket => {
 
         // Handle successful connection
         socket.on('connect', () => {
-            console.log('Socket connected:', socket?.id);
+            // console.log('Socket connected:', socket?.id);
         });
 
         // Handle disconnection
         socket.on('disconnect', (reason) => {
-            console.warn('Socket disconnected:', reason);
+            // console.warn('Socket disconnected:', reason);
             if (reason === 'io server disconnect') {
-                console.warn('Server disconnected the socket. Attempting to reconnect...');
+                // console.warn('Server disconnected the socket. Attempting to reconnect...');
                 socket?.connect(); // Attempt to reconnect manually
             }
         });
 
         // Handle connection errors
         socket.on('connect_error', (err) => {
-            console.error('Socket connection error:', err.message);
+            // console.error('Socket connection error:', err.message);
         });
     }
     return socket;

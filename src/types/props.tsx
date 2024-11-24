@@ -1,6 +1,6 @@
-export type MaxWidth = `${number}px` | `${number}%` | undefined;
+export type MaxWidth = `${number}px` | `${number}%` | `${number}vw` | string | undefined;
 
-export type MinWidth = `${number}px` | `${number}%` | undefined;
+export type MinWidth = `${number}px` | `${number}%` | `${number}vw` | string | undefined;
 
 export type Border =
     | `${number}px ${'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset' | 'none'}`

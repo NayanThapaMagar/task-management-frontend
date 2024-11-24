@@ -5,18 +5,20 @@ import NotificationsIcon from '@mui/icons-material/NotificationsNone';
 import NotificationCard from './NotificationCard';
 import useNotificationBar from '../../hooks/notification/useNotificationBar';
 import { MinWidth, MaxWidth } from '../../types/props'
-import { Notification } from '../../types';
+import useNotificationLifecycle from '../../hooks/notification/useNotificationLifecycle ';
 
 interface NotificationBarProps {
-    notifications: Notification[];
-    onClose: () => void;
+    onClose?: () => void;
     pageMode?: boolean | undefined;
     minWidth?: MinWidth;
     maxWidth?: MaxWidth;
 }
 
 // Notification Bar Component
-const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClose, pageMode, minWidth, maxWidth }) => {
+const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, pageMode, minWidth, maxWidth }) => {
+
+    useNotificationLifecycle()
+
     const {
         anchorEl,
         showUnread,
@@ -24,14 +26,14 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
         markAsRead,
         markAsUnread,
         markAllAsRead,
+        handleOpenNotifications,
         handleDeleteNotification,
         handleNotificationClick,
         filteredNotifications,
         toggleMenu,
         handleScroll,
         handleMenuClose,
-        navigate,
-    } = useNotificationBar(notifications, onClose)
+    } = useNotificationBar(onClose)
 
     const theme = useTheme();
 
@@ -40,7 +42,6 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
             style={{
                 height: '100%',
                 maxHeight: 'inherit',
-                // overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 paddingBottom: '12px',
@@ -88,11 +89,7 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
                         <MenuItem onClick={markAllAsRead}>Mark All as Read</MenuItem>
                         {!pageMode && (
                             <MenuItem
-                                onClick={() => {
-                                    handleMenuClose();
-                                    onClose();
-                                    navigate('/notifications');
-                                }}
+                                onClick={handleOpenNotifications}
                             >
                                 Open Notifications
                             </MenuItem>
@@ -167,13 +164,14 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ notifications, onClos
                 }}
                 onScroll={handleScroll}
             >
-                <List>
+                <List sx={{ width: '100%' }}>
                     {filteredNotifications.length === 0 ? (
                         <Card
                             sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                maxWidth: 400,
+                                justifyContent: 'center',
+                                maxWidth: '100%',
                                 padding: 3,
                                 textAlign: 'center',
                                 boxShadow: 'none',

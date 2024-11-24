@@ -43,12 +43,10 @@ const MainNavbar: React.FC = () => {
         setDrawerOpen,
         notificationAnchorEl,
         unSeenNotificationsCount,
-        allNotifications,
         toggleNotification,
         handleNotificationBarClose,
         handleAccountMenuOpen,
         handleAccountMenuClose,
-        navigate,
         handleNavigation,
         handleLogout,
     } = useMainNavbar()
@@ -118,11 +116,11 @@ const MainNavbar: React.FC = () => {
                             <Box
                                 // onScroll={handleScroll}
                                 style={{
-                                    maxHeight: '88vh',
+                                    maxHeight: '86vh',
                                     overflowY: 'hidden',
                                 }}
                             >
-                                <NotificationBar notifications={allNotifications} maxWidth='350px' onClose={handleNotificationBarClose} />
+                                <NotificationBar maxWidth='350px' onClose={handleNotificationBarClose} />
                             </Box>
                         </Popover>
                     </Box>
@@ -142,7 +140,7 @@ const MainNavbar: React.FC = () => {
                     // disableEnforceFocus={true}
                     // disableRestoreFocus={true}
                     >
-                        <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
+                        {/* <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem> */}
                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
                     </Menu>
 
@@ -180,7 +178,7 @@ const MainNavbar: React.FC = () => {
                         <ListItemIcon>
                             <People />
                         </ListItemIcon>
-                        <ListItemText primary="User Connections" />
+                        <ListItemText primary="Users" />
                     </ListItemButton>
                     <ListItemButton onClick={handleLogout}>
                         <ListItemIcon>

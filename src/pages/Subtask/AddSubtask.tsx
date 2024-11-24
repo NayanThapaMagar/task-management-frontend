@@ -42,7 +42,13 @@ const AddSubtask: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <Box>
+        <Box
+            sx={{
+                overflow: 'auto',
+                maxHeight: 'calc(100vh - 66px)',
+                maxWidth: 'calc(100vw - 57px)',
+            }}
+        >
             <Box sx={{ p: 2, mt: 2 }}>
                 {loading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" height="100px">
@@ -52,11 +58,11 @@ const AddSubtask: React.FC = () => {
                     <Box>
                         <form onSubmit={handleSubmit}>
                             <Typography variant="h5">Add New Subtask</Typography>
-                            <Divider sx={{ mt: 2, mb: 2 }} />
+                            <Divider sx={{ mt: 0, mb: 2 }} />
                             <TextField
                                 label="Title"
                                 fullWidth
-                                margin="normal"
+                                margin="none"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
@@ -70,13 +76,13 @@ const AddSubtask: React.FC = () => {
                                         value={description}
                                         onChange={setDescription}
                                         placeholder={'Description'}
-                                        style={{ marginBottom: '3rem', height: '350px' }}
+                                        style={{ marginBottom: '3rem', height: '300px' }}
                                     />
                                 </Box>
 
                                 <Box display="flex" flexWrap="wrap" flexDirection="row" gap={2}>
                                     <Box flex={1} minWidth="200px">
-                                        <FormControl fullWidth margin="normal">
+                                        <FormControl fullWidth margin="none">
                                             <InputLabel shrink>Priority</InputLabel>
                                             <Select
                                                 value={priority}
@@ -91,7 +97,7 @@ const AddSubtask: React.FC = () => {
                                     </Box>
 
                                     <Box flex={1} minWidth="200px">
-                                        <FormControl fullWidth margin="normal">
+                                        <FormControl fullWidth margin="none">
                                             <InputLabel>Assign To</InputLabel>
                                             <Select
                                                 multiple
