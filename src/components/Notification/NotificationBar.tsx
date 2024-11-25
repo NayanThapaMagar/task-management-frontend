@@ -46,7 +46,6 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, pageMode, mi
                 display: 'flex',
                 flexDirection: 'column',
                 paddingBottom: '12px',
-                minHeight: '400px',
                 minWidth,
                 maxWidth,
             }}
@@ -173,7 +172,7 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, pageMode, mi
                             alignItems: 'center',
                             justifyContent: 'center',
                             maxWidth: '100%',
-                            height: '100%',
+                            minHeight: '200px',
                         }}>
                             <CircularProgress color="primary" />
                         </Box>
