@@ -120,7 +120,7 @@ const MainNavbar: React.FC = () => {
                                     overflowY: 'hidden',
                                 }}
                             >
-                                <NotificationBar maxWidth='350px' onClose={handleNotificationBarClose} />
+                                <NotificationBar maxWidth='350px' minWidth='350px' onClose={handleNotificationBarClose} />
                             </Box>
                         </Popover>
                     </Box>

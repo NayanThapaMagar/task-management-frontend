@@ -111,6 +111,7 @@ const useNotificationBar = (closeNotificationBar?: () => void) => {
         toggleMenu,
         handleScroll,
         handleMenuClose,
+        loading,
     }
 }
 
