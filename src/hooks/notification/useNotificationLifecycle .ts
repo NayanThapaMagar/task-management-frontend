@@ -14,6 +14,8 @@ const useNotificationLifecycle = () => {
 
     useEffect(() => {
         // Initial fetch
+        dispatch(resetNotifications());
+        dispatch(resetUnReadNotifications());
         fetchNotificationsAtMountAndMarkAsSeen()
         return () => {
             dispatch(resetNotifications());

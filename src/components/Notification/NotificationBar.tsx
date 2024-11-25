@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, IconButton, Menu, MenuItem, List, Box, Typography, alpha, useTheme, Divider, CardContent, Card } from '@mui/material';
+import { Button, IconButton, Menu, MenuItem, List, Box, Typography, alpha, useTheme, Divider, CardContent, Card, CircularProgress } from '@mui/material';
 import { MoreHoriz } from '@mui/icons-material';
 import NotificationsIcon from '@mui/icons-material/NotificationsNone';
 import NotificationCard from './NotificationCard';
@@ -33,6 +33,7 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, pageMode, mi
         toggleMenu,
         handleScroll,
         handleMenuClose,
+        loading,
     } = useNotificationBar(onClose)
 
     const theme = useTheme();
@@ -165,48 +166,60 @@ const NotificationBar: React.FC<NotificationBarProps> = ({ onClose, pageMode, mi
                 onScroll={handleScroll}
             >
                 <List sx={{ width: '100%' }}>
-                    {filteredNotifications.length === 0 ? (
-                        <Card
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                maxWidth: '100%',
-                                padding: 3,
-                                textAlign: 'center',
-                                boxShadow: 'none',
-                            }}
-                        >
-                            <CardContent>
-                                <NotificationsIcon
-                                    sx={{ fontSize: 60, color: 'grey.500', marginBottom: 2 }}
-                                />
-                                <Typography
-                                    variant="h6"
-                                    color="textSecondary"
-                                    gutterBottom
-                                >
-                                    No Notifications Found
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    You currently don't have any notifications. Check back
-                                    later!
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <Box width={'100%'}>
-                            {filteredNotifications.map((notification) => (
-                                <NotificationCard
-                                    key={notification._id}
-                                    notification={notification}
-                                    onMarkAsRead={markAsRead}
-                                    onMarkAsUnread={markAsUnread}
-                                    onDelete={handleDeleteNotification}
-                                    onNotificationClick={handleNotificationClick}
-                                />
-                            ))}
+                    {loading ? (
+                        <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            maxWidth: '100%',
+                            minHeight: '200px',
+                        }}>
+                            <CircularProgress color="primary" />
                         </Box>
+                    ) : (
+                        filteredNotifications.length === 0 ? (
+                            <Card
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    maxWidth: '100%',
+                                    padding: 3,
+                                    textAlign: 'center',
+                                    boxShadow: 'none',
+                                }}
+                            >
+                                <CardContent>
+                                    <NotificationsIcon
+                                        sx={{ fontSize: 60, color: 'grey.500', marginBottom: 2 }}
+                                    />
+                                    <Typography
+                                        variant="h6"
+                                        color="textSecondary"
+                                        gutterBottom
+                                    >
+                                        No Notifications Found
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        You currently don't have any notifications. Check back
+                                        later!
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <Box width={'100%'}>
+                                {filteredNotifications.map((notification) => (
+                                    <NotificationCard
+                                        key={notification._id}
+                                        notification={notification}
+                                        onMarkAsRead={markAsRead}
+                                        onMarkAsUnread={markAsUnread}
+                                        onDelete={handleDeleteNotification}
+                                        onNotificationClick={handleNotificationClick}
+                                    />
+                                ))}
+                            </Box>
+                        )
                     )}
                 </List>
             </Box>

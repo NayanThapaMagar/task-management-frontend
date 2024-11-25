@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Set environment-specific base URL
-const BASE_URL = `${process.env.REACT_APP_API_BASE_URL}`
+const BASE_URL = `${process.env.REACT_APP_BACKEND_API_BASE_URL}`
+
 
 // Create an axios instance with a base URL for authentication APIs.
 const axiosInstance = axios.create({

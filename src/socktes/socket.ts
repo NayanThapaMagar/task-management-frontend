@@ -5,7 +5,7 @@ let socket: Socket | null = null;
 // Function to initialize the socket connection after login
 export const initializeSocket = (token: string): Socket => {
     if (!socket) {
-        socket = io('http://localhost:5000', {
+        socket = io(`${process.env.REACT_APP_BACKEND_API_BASE_URL}`, {
             transports: ['websocket'],
             reconnection: true,
             reconnectionAttempts: 5,

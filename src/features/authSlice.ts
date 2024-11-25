@@ -32,7 +32,7 @@ export const register = createAsyncThunk(
 
             return { token, user };
         } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Registration failed');
+            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Registration failed. Network Error.');
         }
     }
 );
@@ -51,7 +51,7 @@ export const login = createAsyncThunk(
 
             return { token, user };
         } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
+            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed. Netwrok Error.');
         }
     }
 );
